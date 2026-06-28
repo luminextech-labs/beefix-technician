@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Beefix Technician</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #FFB800;
+      --primary-dark: #E5A500;
+      --primary-light: #FFF0B3;
+      --bg: #FFF8E7;
+      --white: #FFFFFF;
+      --text: #3D2C00;
+      --text-light: #8B7355;
+      --border: #F0E4C8;
+      --shadow: 0 2px 12px rgba(180,130,0,0.10);
+      --radius: 16px;
+      --green: #22C55E;
+      --red: #EF4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ========== HEADER ========== */
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 16px 20px 60px;
+      border-radius: 0 0 24px 24px;
+      position: relative;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .header-title { font-size: 18px; font-weight: 700; color: #3D2C00; }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: #3D2C00;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .header-actions { display: flex; gap: 10px; }
+
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      color: #3D2C00;
+    }
+
+    .header-greeting { font-size: 13px; color: #3D2C00; opacity: 0.8; }
+    .header-greeting strong { font-weight: 700; }
+
+    /* ========== SEARCH BAR ========== */
+    .search-container {
+      position: absolute;
+      bottom: -28px;
+      left: 20px;
+      right: 20px;
+    }
+
+    .search-bar {
+      background: var(--white);
+      border-radius: 50px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .search-bar .icon { font-size: 20px; opacity: 0.5; }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      font-family: 'Prompt', sans-serif;
+      background: transparent;
+    }
+
+    .search-bar input::placeholder { color: var(--text-light); }
+
+    /* ========== STATS CARDS ========== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 0 20px;
+      margin-top: 8px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.red { color: var(--red); }
+
+    /* ========== SECTIONS ========== */
+    .section { padding: 20px 20px 0; }
+    .section-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+
+    /* ========== JOB CARD ========== */
+    .job-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .job-type {
+      background: var(--primary-light);
+      color: #8B6914;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 50px;
+    }
+
+    .job-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 50px;
+    }
+
+    .job-status.new { background: #FEE2E2; color: #DC2626; }
+    .job-status.confirmed { background: #D1FAE5; color: #059669; }
+    .job-status.inprogress { background: #DBEAFE; color: #2563EB; }
+
+    .job-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .job-location { font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
+    .job-price { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+    .job-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .job-time { font-size: 12px; color: var(--text-light); }
+
+    .job-actions { display: flex; gap: 8px; }
+
+    .btn {
+      border: none;
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Prompt', sans-serif;
+      cursor: pointer;
+    }
+
+    .btn-primary { background: var(--primary); color: #3D2C00; }
+    .btn-outline { background: transparent; color: var(--text-light); border: 1.5px solid var(--border); }
+    .btn-accept { background: var(--green); color: white; }
+    .btn-reject { background: #FEE2E2; color: var(--red); }
+    .btn-call { background: var(--primary-light); color: #8B6914; border: none; padding: 8px 14px; border-radius: 50px; font-size: 16px; }
+
+    /* ========== BOTTOM NAV ========== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 20px;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-light);
+      font-size: 10px;
+      font-weight: 600;
+      border: none;
+      background: none;
+      font-family: 'Prompt', sans-serif;
+      text-decoration: none;
+    }
+
+    .nav-item.active { color: var(--primary); font-weight: 700; }
+    .nav-item .icon { font-size: 20px; }
+
+    /* ========== TOGGLE STATUS ========== */
+    .status-toggle {
+      display: flex;
+      gap: 10px;
+      padding: 12px 20px;
+      background: var(--white);
+      border-radius: 12px;
+      margin: 12px 20px;
+      box-shadow: var(--shadow);
+      align-items: center;
+    }
+
+    .status-toggle label { font-size: 14px; font-weight: 600; flex: 1; }
+    .toggle {
+      width: 48px;
+      height: 26px;
+      background: var(--border);
+      border-radius: 50px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle.on { background: var(--green); }
+    .toggle::after {
+      content: '';
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: left 0.3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle.on::after { left: 24px; }
+
+    .toggle-status-text { font-size: 12px; color: var(--green); font-weight: 700; min-width: 50px; text-align: right; }
+
+    /* ========== WALLET ========== */
+    .wallet-card {
+      background: linear-gradient(135deg, #FFB800 0%, #FFC933 100%);
+      margin: 0 20px 16px;
+      border-radius: var(--radius);
+      padding: 24px;
+      color: #3D2C00;
+    }
+
+    .wallet-label { font-size: 13px; opacity: 0.8; margin-bottom: 4px; }
+    .wallet-balance { font-size: 36px; font-weight: 700; margin-bottom: 4px; }
+    .wallet-sub { font-size: 12px; opacity: 0.7; margin-bottom: 20px; }
+
+    .wallet-actions { display: flex; gap: 10px; }
+    .wallet-btn {
+      flex: 1;
+      background: rgba(255,255,255,0.3);
+      border: none;
+      border-radius: 50px;
+      padding: 10px;
+      color: #3D2C00;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Prompt', sans-serif;
+      cursor: pointer;
+    }
+
+    /* ========== PROFILE ========== */
+    .profile-header {
+      background: var(--primary);
+      padding: 24px 20px 60px;
+      color: #3D2C00;
+    }
+
+    .profile-info {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .profile-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      border: 3px solid rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .profile-name { font-size: 18px; font-weight: 700; }
+    .profile-role { font-size: 13px; opacity: 0.8; margin-bottom: 4px; }
+    .profile-rating { font-size: 14px; font-weight: 700; }
+
+    .profile-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.3);
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .profile-card {
+      background: var(--white);
+      margin: -40px 20px 16px;
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      z-index: 10;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+
+    .profile-stat-value { font-size: 18px; font-weight: 700; color: var(--primary); }
+    .profile-stat-label { font-size: 11px; color: var(--text-light); }
+
+    /* ========== MENU ========== */
+    .menu-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      margin: 0 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item:active { background: #f9f9f9; }
+
+    .menu-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--primary-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .menu-text { flex: 1; font-size: 14px; font-weight: 600; }
+    .menu-arrow { color: var(--text-light); font-size: 16px; }
+
+    /* ========== EARNING ========== */
+    .earning-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .earning-row:last-child { border-bottom: none; }
+    .earning-label { font-size: 13px; color: var(--text-light); }
+    .earning-value { font-size: 14px; font-weight: 700; }
+    .earning-value.income { color: var(--green); }
+    .earning-value.outcome { color: var(--red); }
+
+    /* ========== SPACER ========== */
+    .spacer { height: 20px; }
+
+    /* ========== LOGIN ========== */
+    .login-page {
+      min-height: 100vh;
+      background: var(--primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-logo { font-size: 64px; margin-bottom: 10px; }
+    .login-title { font-size: 28px; font-weight: 700; color: #3D2C00; margin-bottom: 4px; }
+    .login-sub { font-size: 14px; color: #8B7355; margin-bottom: 32px; }
+
+    .login-form {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 4px 24px rgba(180,130,0,0.2);
+    }
+
+    .login-form h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; color: var(--text); }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: block; }
+    .form-input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: 'Prompt', sans-serif;
+      outline: none;
+      background: var(--bg);
+    }
+
+    .form-input:focus { border-color: var(--primary); }
+
+    .login-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #3D2C00;
+      border: none;
+      border-radius: 50px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Prompt', sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* ========== CHAT ========== */
+    .chat-list-item {
+      background: var(--white);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .chat-list-item:active { background: #f5f5f5; }
+
+    .chat-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .chat-info { flex: 1; }
+    .chat-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .chat-preview { font-size: 12px; color: var(--text-light); }
+    .chat-job { font-size: 11px; color: var(--primary); font-weight: 600; margin-bottom: 2px; }
+
+    .chat-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .chat-time { font-size: 11px; color: var(--text-light); }
+    .chat-badge {
+      background: var(--primary);
+      color: #3D2C00;
+      font-size: 10px;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ========== WORK HISTORY ========== */
+    .history-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin: 0 20px 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .history-title { font-size: 14px; font-weight: 700; }
+    .history-date { font-size: 11px; color: var(--text-light); }
+    .history-price { font-size: 16px; font-weight: 700; color: var(--green); }
+
+    /* ========== TABS ========== */
+    .tabs {
+      display: flex;
+      background: var(--white);
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-light);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* ========== NOTIFICATION BADGE ========== */
+    .notif-badge {
+      background: var(--red);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: -2px;
+      right: -2px;
+    }
+
+    /* ========== SETUP TOGGLE ========== */
+    .toggle-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-item:last-child { border-bottom: none; }
+    .toggle-item-label { font-size: 14px; font-weight: 600; }
+    .toggle-item-desc { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: LOGIN (default visible) -->
+  <!-- ======================================================= -->
+  <div id="page-login">
+
+    <div class="login-page">
+      <div class="login-logo">🍖</div>
+      <div class="login-title">Beefix Technician</div>
+      <div class="login-sub">ระบบจัดการงานสำหรับช่างมืออาชีพ</div>
+
+      <div class="login-form">
+        <h3>เข้าสู่ระบบ</h3>
+        <div class="form-group">
+          <label class="form-label">เบอร์โทรศัพท์</label>
+          <input type="tel" class="form-input" placeholder="081-234-5678">
+        </div>
+        <div class="form-group">
+          <label class="form-label">รหัสผ่าน</label>
+          <input type="password" class="form-input" placeholder="••••••••">
+        </div>
+        <button class="login-btn" onclick="navigate('dashboard')">เข้าสู่ระบบ</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: DASHBOARD -->
+  <!-- ======================================================= -->
+  <div id="page-dashboard" style="display:none;">
+
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <div class="header-title">🍖 Beefix Technician</div>
+          <div class="header-greeting">สวัสดีครับ <strong>สมศักดิ์ ช่างไฟ</strong></div>
+        </div>
+        <div class="header-actions">
+          <button class="header-btn" onclick="navigate('notifications')">🔔<span class="notif-badge">3</span></button>
+          <button class="header-btn" onclick="navigate('profile')">👤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATUS TOGGLE -->
+    <div style="margin-top: -20px;">
+      <div class="status-toggle">
+        <label>รับงานอัตโนมัติ</label>
+        <div class="toggle on" onclick="this.classList.toggle('on');"></div>
+        <span class="toggle-status-text">เปิด</span>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value green">3</div>
+        <div class="stat-label">งานวันนี้</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">5,400</div>
+        <div class="stat-label">รายได้วันนี้ (฿)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value red">2</div>
+        <div class="stat-label">งานรอตอบ</div>
+      </div>
+    </div>
+
+    <!-- WALLET QUICK -->
+    <div style="padding:16px 20px 0;">
+      <div class="wallet-card" style="margin:0; padding:16px 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:12px; opacity:0.8;">ยอดเงิน</div>
+            <div style="font-size:28px; font-weight:700;">฿ 24,350</div>
+          </div>
+          <div class="wallet-actions">
+            <button class="wallet-btn" style="padding:8px 14px; font-size:12px;">เติมเงิน</button>
+            <button class="wallet-btn" style="padding:8px 14px; font-size:12px;" onclick="navigate('wallet')">ถอน</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW JOBS -->
+    <div class="section">
+      <div class="section-title">📋 งานใหม่รอตอบรับ</div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <span class="job-type">ซ่อมไฟฟ้า</span>
+          <span class="job-status new">งานใหม่</span>
+        </div>
+        <div class="job-title">เดินสายไฟห้องครัว 3 จุด</div>
+        <div class="job-location">📍 123/45 ซ.สุขุมวิท 49 บางนา</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div class="job-price">฿ 700</div>
+          <div class="job-time">🕐 วันนี้ 14:00 น.</div>
+        </div>
+        <div class="job-footer">
+          <div style="font-size:12px; color:var(--text-light);">ลูกค้า: คุณสมชาย ⭐ 4.8</div>
+          <div class="job-actions">
+            <button class="btn btn-reject">ปฏิเสธ</button>
+            <button class="btn btn-accept">รับงาน</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <span class="job-type">ติดตั้ง</span>
+          <span class="job-status new">งานใหม่</span>
+        </div>
+        <div class="job-title">ติดตั้งปลั๊กไฟ 5 จุด</div>
+        <div class="job-location">📍 88 อาคารทาวเวอร์ ชั้น 15 รัชดา</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div class="job-price">฿ 450</div>
+          <div class="job-time">🕐 วันพรุ่งนี้ 10:00 น.</div>
+        </div>
+        <div class="job-footer">
+          <div style="font-size:12px; color:var(--text-light);">ลูกค้า: คุณพี่แนน ⭐ 5.0</div>
+          <div class="job-actions">
+            <button class="btn btn-reject">ปฏิเสธ</button>
+            <button class="btn btn-accept">รับงาน</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IN PROGRESS -->
+    <div class="section">
+      <div class="section-title">🔧 งานที่กำลังดำเนินอยู่</div>
+
+      <div class="job-card">
+        <div class="job-header">
+          <span class="job-type">ซ่อมไฟฟ้า</span>
+          <span class="job-status inprogress">กำลังทำ</span>
+        </div>
+        <div class="job-title">เดินสายไฟห้องนอน</div>
+        <div class="job-location">📍 55 ซ.พระราม 4 เขตปทุมวัน</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div class="job-price">฿ 900</div>
+          <div class="job-time">🕐 วันนี้ 09:00 น. → 12:00 น.</div>
+        </div>
+        <div class="job-footer">
+          <div style="font-size:12px; color:var(--text-light);">ลูกค้า: คุณเจี๊ยบ</div>
+          <div class="job-actions">
+            <button class="btn btn-call">📞</button>
+            <button class="btn btn-primary" onclick="navigate('chat-room')">💬 แชท</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <a href="#" class="nav-item active" onclick="navigate('dashboard')"><span class="icon">🏠</span>หน้าแรก</a>
+      <a href="#" class="nav-item" onclick="navigate('jobs')"><span class="icon">📋</span>งาน</a>
+      <a href="#" class="nav-item" onclick="navigate('chat')"><span class="icon">💬</span>แชท<span class="notif-badge" style="position:relative; top:-2px; right:0;">2</span></a>
+      <a href="#" class="nav-item" onclick="navigate('wallet')"><span class="icon">💳</span>กระเป๋า</a>
+      <a href="#" class="nav-item" onclick="navigate('profile')"><span class="icon">👤</span>โปรไฟล์</a>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: JOBS LIST (NEW / IN PROGRESS / COMPLETED) -->
+  <!-- ======================================================= -->
+  <div id="page-jobs" style="display:none;">
+
+    <div class="header">
+      <div class="header-top">
+        <div class="header-title">📋 งานทั้งหมด</div>
+        <div class="header-actions">
+          <button class="header-btn">🔍</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active">งานใหม่</button>
+      <button class="tab">กำลังทำ</button>
+      <button class="tab">เสร็จแล้ว</button>
+    </div>
+
+    <div style="padding:16px 0;">
+      <div class="job-card" style="margin:0 20px 12px;">
+        <div class="job-header">
+          <span class="job-type">ซ่อมไฟฟ้า</span>
+          <span class="job-status new">งานใหม่</span>
+        </div>
+        <div class="job-title">เดินสายไฟห้องครัว 3 จุด</div>
+        <div class="job-location">📍 บางนา กรุงเทพฯ</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div class="job-price">฿ 700</div>
+          <div class="job-time">🕐 วันนี้ 14:00 น.</div>
+        </div>
+        <div class="job-footer">
+          <div style="font-size:12px; color:var(--text-light);">ลูกค้า: คุณสมชาย ⭐ 4.8</div>
+          <div class="job-actions">
+            <button class="btn btn-reject">ปฏิเสธ</button>
+            <button class="btn btn-accept">รับงาน</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="job-card" style="margin:0 20px 12px;">
+        <div class="job-header">
+          <span class="job-type">ติดตั้ง</span>
+          <span class="job-status confirmed">ยืนยันแล้ว</span>
+        </div>
+        <div class="job-title">ติดตั้งปลั๊กไฟ 5 จุด</div>
+        <div class="job-location">📍 รัชดาภิเษก</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div class="job-price">฿ 450</div>
+          <div class="job-time">🕐 วันพรุ่งนี้ 10:00 น.</div>
+        </div>
+        <div class="job-footer">
+          <div style="font-size:12px; color:var(--text-light);">ลูกค้า: คุณพี่แนน ⭐ 5.0</div>
+          <div class="job-actions">
+            <button class="btn btn-outline">รายละเอียด</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="job-card" style="margin:0 20px 12px;">
+        <div class="job-header">
+          <span class="job-type">ซ่อม</span>
+          <span class="job-status inprogress">กำลังทำ</span>
+        </div>
+        <div class="job-title">เดินสายไฟห้องนอน</div>
+        <div class="job-location">📍 ปทุมวัน</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+          <div class="job-price">฿ 900</div>
+          <div class="job-time">🕐 วันนี้ 09:00 - 12:00 น.</div>
+        </div>
+        <div class="job-footer">
+          <div style="font-size:12px; color:var(--text-light);">ลูกค้า: คุณเจี๊ยบ</div>
+          <div class="job-actions">
+            <button class="btn btn-primary" onclick="navigate('chat-room')">💬 แชท</button>
+            <button class="btn btn-accept">เสร็จแล้ว</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <a href="#" class="nav-item" onclick="navigate('dashboard')"><span class="icon">🏠</span>หน้าแรก</a>
+      <a href="#" class="nav-item active" onclick="navigate('jobs')"><span class="icon">📋</span>งาน</a>
+      <a href="#" class="nav-item" onclick="navigate('chat')"><span class="icon">💬</span>แชท</a>
+      <a href="#" class="nav-item" onclick="navigate('wallet')"><span class="icon">💳</span>กระเป๋า</a>
+      <a href="#" class="nav-item" onclick="navigate('profile')"><span class="icon">👤</span>โปรไฟล์</a>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: WALLET -->
+  <!-- ======================================================= -->
+  <div id="page-wallet" style="display:none;">
+
+    <div class="header">
+      <div class="header-top">
+        <button class="back-btn" onclick="navigate('dashboard')">←</button>
+        <div class="header-title">💳 กระเป๋าเงิน</div>
+        <div class="header-actions"><button class="header-btn">📜</button></div>
+      </div>
+    </div>
+
+    <div class="wallet-card">
+      <div class="wallet-label">ยอดเงินคงเหลือ</div>
+      <div class="wallet-balance">฿ 24,350</div>
+      <div class="wallet-sub">รายได้สะสม ฿ 156,800</div>
+      <div class="wallet-actions">
+        <button class="wallet-btn">+ เติมเงิน</button>
+        <button class="wallet-btn">ถอนเงิน</button>
+      </div>
+    </div>
+
+    <!-- WITHDRAW -->
+    <div class="section">
+      <div class="section-title">📤 ถอนเงิน</div>
+      <div style="background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);">
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+          <input type="number" placeholder="จำนวนเงิน" value="5,000" style="flex:1; border:1.5px solid var(--border); border-radius:10px; padding:12px; font-size:14px; font-family:'Prompt',sans-serif; outline:none;">
+          <button class="btn btn-primary" style="padding:12px 20px;">ถอน</button>
+        </div>
+        <div style="font-size:12px; color:var(--text-light);">ยอดขั้นต่ำ ฿ 500 | ดำเนินการภายใน 24 ชม.</div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="section">
+      <div class="section-title">📜 รายการล่าสุด</div>
+      <div style="background:white; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);">
+        <div class="earning-row">
+          <div>
+            <div class="earning-label">งาน #BKF-002847</div>
+            <div style="font-size:11px; color:var(--text-light);">28 มิ.ย. 2569 · 14:30</div>
+          </div>
+          <div class="earning-value income">+ ฿ 700</div>
+        </div>
+        <div class="earning-row">
+          <div>
+            <div class="earning-label">งาน #BKF-002831</div>
+            <div style="font-size:11px; color:var(--text-light);">26 มิ.ย. 2569 · 11:00</div>
+          </div>
+          <div class="earning-value income">+ ฿ 1,200</div>
+        </div>
+        <div class="earning-row">
+          <div>
+            <div class="earning-label">ถอนเงินเข้าบัญชี</div>
+            <div style="font-size:11px; color:var(--text-light);">25 มิ.ย. 2569 · 09:00</div>
+          </div>
+          <div class="earning-value outcome">- ฿ 10,000</div>
+        </div>
+        <div class="earning-row">
+          <div>
+            <div class="earning-label">งาน #BKF-002819</div>
+            <div style="font-size:11px; color:var(--text-light);">24 มิ.ย. 2569 · 15:00</div>
+          </div>
+          <div class="earning-value income">+ ฿ 850</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <a href="#" class="nav-item" onclick="navigate('dashboard')"><span class="icon">🏠</span>หน้าแรก</a>
+      <a href="#" class="nav-item" onclick="navigate('jobs')"><span class="icon">📋</span>งาน</a>
+      <a href="#" class="nav-item" onclick="navigate('chat')"><span class="icon">💬</span>แชท</a>
+      <a href="#" class="nav-item active" onclick="navigate('wallet')"><span class="icon">💳</span>กระเป๋า</a>
+      <a href="#" class="nav-item" onclick="navigate('profile')"><span class="icon">👤</span>โปรไฟล์</a>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: CHAT LIST -->
+  <!-- ======================================================= -->
+  <div id="page-chat" style="display:none;">
+
+    <div class="header">
+      <div class="header-top">
+        <div class="header-title">💬 แชท</div>
+        <div class="header-actions"><button class="header-btn">✏️</button></div>
+      </div>
+    </div>
+
+    <div class="chat-list-item" onclick="navigate('chat-room')">
+      <div class="chat-avatar">👨</div>
+      <div class="chat-info">
+        <div class="chat-name">คุณสมชาย ใจดี</div>
+        <div class="chat-job">งาน: เดินสายไฟห้องครัว</div>
+        <div class="chat-preview">รอยืนยันครับ</div>
+      </div>
+      <div class="chat-meta">
+        <div class="chat-time">10:30</div>
+        <div class="chat-badge">1</div>
+      </div>
+    </div>
+
+    <div class="chat-list-item" onclick="navigate('chat-room')">
+      <div class="chat-avatar">👩</div>
+      <div class="chat-info">
+        <div class="chat-name">คุณพี่แนน</div>
+        <div class="chat-job">งาน: ติดตั้งปลั๊กไฟ</div>
+        <div class="chat-preview">ขอนัดเป็นบ่าย 2 ได้ไหมคะ?</div>
+      </div>
+      <div class="chat-meta">
+        <div class="chat-time">09:45</div>
+        <div class="chat-badge">1</div>
+      </div>
+    </div>
+
+    <div class="chat-list-item" onclick="navigate('chat-room')">
+      <div class="chat-avatar">👨</div>
+      <div class="chat-info">
+        <div class="chat-name">คุณเจี๊ยบ</div>
+        <div class="chat-job">งาน: เดินสายไฟห้องนอน</div>
+        <div class="chat-preview">ช่างมาถึงแล้วครับ 👍</div>
+      </div>
+      <div class="chat-meta">
+        <div class="chat-time">08:55</div>
+      </div>
+    </div>
+
+    <div class="chat-list-item">
+      <div class="chat-avatar">👩‍💼</div>
+      <div class="chat-info">
+        <div class="chat-name">ฝ่ายบริการลูกค้า</div>
+        <div class="chat-preview">มีข้อความใหม่จากฝ่ายบริการ</div>
+      </div>
+      <div class="chat-meta">
+        <div class="chat-time">เมื่อวาน</div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <a href="#" class="nav-item" onclick="navigate('dashboard')"><span class="icon">🏠</span>หน้าแรก</a>
+      <a href="#" class="nav-item" onclick="navigate('jobs')"><span class="icon">📋</span>งาน</a>
+      <a href="#" class="nav-item active" onclick="navigate('chat')"><span class="icon">💬</span>แชท</a>
+      <a href="#" class="nav-item" onclick="navigate('wallet')"><span class="icon">💳</span>กระเป๋า</a>
+      <a href="#" class="nav-item" onclick="navigate('profile')"><span class="icon">👤</span>โปรไฟล์</a>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: CHAT ROOM -->
+  <!-- ======================================================= -->
+  <div id="page-chat-room" style="display:none;">
+
+    <div style="background:var(--white); padding:14px 20px; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:center; position:sticky; top:0; z-index:20;">
+      <button onclick="navigate('chat')" style="background:none; border:none; font-size:22px; cursor:pointer;">←</button>
+      <div class="chat-avatar" style="width:40px;height:40px;font-size:20px;">👨</div>
+      <div style="flex:1;">
+        <div style="font-size:15px; font-weight:700;">คุณสมชาย ใจดี</div>
+        <div style="font-size:11px; color:var(--green);">● ออนไลน์</div>
+      </div>
+      <button style="background:none; border:none; font-size:18px; cursor:pointer;">📞</button>
+    </div>
+
+    <!-- JOB INFO -->
+    <div style="background:var(--primary-light); margin:16px 20px 0; padding:12px 16px; border-radius:12px;">
+      <div style="font-size:13px; font-weight:700;">📋 เดินสายไฟห้องครัว 3 จุด</div>
+      <div style="font-size:12px; color:var(--text-light);">📍 บางนา | วันนี้ 14:00 น. | <span style="color:var(--primary); font-weight:700;">฿ 700</span></div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div style="padding:20px; display:flex; flex-direction:column; gap:12px;">
+
+      <div style="display:flex; gap:8px; max-width:85%;">
+        <div class="chat-avatar" style="width:32px;height:32px;font-size:16px;">👨</div>
+        <div>
+          <div style="background:white; padding:10px 14px; border-radius:16px; font-size:14px; box-shadow:var(--shadow);">สวัสดีครับ ช่างสมศักดิ์ใช่ไหมครับ?</div>
+          <div style="font-size:10px; color:var(--text-light); margin-top:4px;">10:30</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; max-width:85%;">
+        <div class="chat-avatar" style="width:32px;height:32px;font-size:16px;">👨</div>
+        <div>
+          <div style="background:white; padding:10px 14px; border-radius:16px; font-size:14px; box-shadow:var(--shadow);">อยากสอบถามว่าติดตั้งได้ภายในกี่ชั่วโมงครับ?</div>
+          <div style="font-size:10px; color:var(--text-light); margin-top:4px;">10:31</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; max-width:85%; align-self:flex-end; flex-direction:row-reverse;">
+        <div class="chat-avatar" style="width:32px;height:32px;font-size:16px; background:var(--primary-light);">🔧</div>
+        <div>
+          <div style="background:var(--primary); color:#3D2C00; padding:10px 14px; border-radius:16px; font-size:14px;">สวัสดีครับ ใช่ครับ ประมาณ 2 ชั่วโมงครับ 👍</div>
+          <div style="font-size:10px; color:var(--text-light); margin-top:4px; text-align:right;">10:33</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; max-width:85%; align-self:flex-end; flex-direction:row-reverse;">
+        <div class="chat-avatar" style="width:32px;height:32px;font-size:16px; background:var(--primary-light);">🔧</div>
+        <div>
+          <div style="background:var(--primary); color:#3D2C00; padding:10px 14px; border-radius:16px; font-size:14px;">ยืนยันรับงานแล้วครับ เดี๋ยวไปถึงบ่าย 2 ครับ</div>
+          <div style="font-size:10px; color:var(--text-light); margin-top:4px; text-align:right;">10:34</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; max-width:85%;">
+        <div class="chat-avatar" style="width:32px;height:32px;font-size:16px;">👨</div>
+        <div>
+          <div style="background:white; padding:10px 14px; border-radius:16px; font-size:14px; box-shadow:var(--shadow);">โอเคครับ รอเลยครับ 👍</div>
+          <div style="font-size:10px; color:var(--text-light); margin-top:4px;">10:35</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div style="background:white; padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:center; position:fixed; bottom:0; left:0; right:0; z-index:50;">
+      <input type="text" placeholder=" พิมพ์ข้อความ..." style="flex:1; border:1px solid var(--border); border-radius:50px; padding:10px 16px; font-size:14px; font-family:'Prompt',sans-serif; outline:none;">
+      <button style="width:42px;height:42px;background:var(--primary);border:none;border-radius:50%;color:#3D2C00;font-size:18px;cursor:pointer; display:flex;align-items:center;justify-content:center;">➤</button>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: PROFILE -->
+  <!-- ======================================================= -->
+  <div id="page-profile" style="display:none;">
+
+    <div class="profile-header">
+      <div class="header-top" style="margin-bottom:16px;">
+        <button class="back-btn" onclick="navigate('dashboard')">←</button>
+        <div style="font-size:16px; font-weight:700; color:#3D2C00;">โปรไฟล์</div>
+        <button class="header-btn" onclick="navigate('settings')">⚙️</button>
+      </div>
+      <div class="profile-info">
+        <div class="profile-avatar">🔧</div>
+        <div>
+          <div class="profile-name">สมศักดิ์ ช่างไฟ</div>
+          <div class="profile-role">ช่างไฟฟ้า | เขตบางนา กรุงเทพฯ</div>
+          <div class="profile-rating">⭐ 4.8 (213 รีวิว)</div>
+          <div class="profile-badge">✅ ยืนยันตัวตนแล้ว</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="profile-card">
+      <div class="profile-stats">
+        <div>
+          <div class="profile-stat-value">213</div>
+          <div class="profile-stat-label">งานเสร็จ</div>
+        </div>
+        <div>
+          <div class="profile-stat-value">156,800</div>
+          <div class="profile-stat-label">รายได้รวม (฿)</div>
+        </div>
+        <div>
+          <div class="profile-stat-value">8 ปี</div>
+          <div class="profile-stat-label">ประสบการณ์</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU -->
+    <div style="padding:16px 0;">
+      <div class="menu-card" style="margin:0 20px 12px;">
+        <div class="menu-item" onclick="navigate('edit-technician')">
+          <div class="menu-icon">✏️</div>
+          <div class="menu-text">แก้ไขโปรไฟล์</div>
+          <div class="menu-arrow">→</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">📋</div>
+          <div class="menu-text">ผลงาน/รูปภาพ</div>
+          <div class="menu-arrow">→</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">🏅</div>
+          <div class="menu-text">ใบรับรอง/วุฒิบัตร</div>
+          <div class="menu-arrow">→</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">📊</div>
+          <div class="menu-text">สถิติและรายงาน</div>
+          <div class="menu-arrow">→</div>
+        </div>
+      </div>
+
+      <div class="menu-card" style="margin:0 20px;">
+        <div class="menu-item" onclick="navigate('settings')">
+          <div class="menu-icon">⚙️</div>
+          <div class="menu-text">ตั้งค่า</div>
+          <div class="menu-arrow">→</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">❓</div>
+          <div class="menu-text">ศูนย์ช่วยเหลือ</div>
+          <div class="menu-arrow">→</div>
+        </div>
+        <div class="menu-item" onclick="navigate('login')">
+          <div class="menu-icon" style="background:#FEE2E2;">🚪</div>
+          <div class="menu-text" style="color:var(--red);">ออกจากระบบ</div>
+          <div class="menu-arrow">→</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <a href="#" class="nav-item" onclick="navigate('dashboard')"><span class="icon">🏠</span>หน้าแรก</a>
+      <a href="#" class="nav-item" onclick="navigate('jobs')"><span class="icon">📋</span>งาน</a>
+      <a href="#" class="nav-item" onclick="navigate('chat')"><span class="icon">💬</span>แชท</a>
+      <a href="#" class="nav-item" onclick="navigate('wallet')"><span class="icon">💳</span>กระเป๋า</a>
+      <a href="#" class="nav-item active" onclick="navigate('profile')"><span class="icon">👤</span>โปรไฟล์</a>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- PAGE: SETTINGS -->
+  <!-- ======================================================= -->
+  <div id="page-settings" style="display:none;">
+
+    <div class="header">
+      <div class="header-top">
+        <button class="back-btn" onclick="navigate('profile')">←</button>
+        <div class="header-title">⚙️ ตั้งค่า</div>
+        <div style="width:38px;"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔔 การแจ้งเตือน</div>
+      <div style="background:white; border-radius:var(--radius); padding:0 4px; box-shadow:var(--shadow);">
+        <div class="toggle-item">
+          <div>
+            <div class="toggle-item-label">งานใหม่เข้ามา</div>
+            <div class="toggle-item-desc">แจ้งเตือนเมื่อลูกค้าขอจอง</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on');"></div>
+        </div>
+        <div class="toggle-item">
+          <div>
+            <div class="toggle-item-label">ข้อความใหม่</div>
+            <div class="toggle-item-desc">แจ้งเตือนแชทจากลูกค้า</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on');"></div>
+        </div>
+        <div class="toggle-item">
+          <div>
+            <div class="toggle-item-label">แจ้งเตือนทาง SMS</div>
+            <div class="toggle-item-desc">SMS เมื่อได้รับงานใหม่</div>
+          </div>
+          <div class="toggle" onclick="this.classList.toggle('on');"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔒 ความเป็นส่วนตัว</div>
+      <div style="background:white; border-radius:var(--radius); padding:0 4px; box-shadow:var(--shadow);">
+        <div class="toggle-item">
+          <div>
+            <div class="toggle-item-label">แสดงตำแหน่งให้ลูกค้าเห็น</div>
+            <div class="toggle-item-desc">อนุญาตให้ลูกค้าเห็นที่อยู่ขณะทำงาน</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on');"></div>
+        </div>
+        <div class="toggle-item">
+          <div>
+            <div class="toggle-item-label">รับงานอัตโนมัติ</div>
+            <div class="toggle-item-desc">รับงานที่ตรงกับทักษะโดยไม่ต้องกดรับ</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on');"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📱 บัญชี</div>
+      <div style="background:white; border-radius:var(--radius); padding:0 4px; box-shadow:var(--shadow);">
+        <div class="menu-item">
+          <div class="menu-icon">🔑</div>
+          <div class="menu-text">เปลี่ยนรหัสผ่าน</div>
+          <div class="menu-arrow">→</div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">📱</div>
+          <div class="menu-text">เปลี่ยนเบอร์โทร</div>
+          <div class="menu-arrow">→</div>
+        </div>
+        <div class="menu-item" onclick="navigate('login')">
+          <div class="menu-icon" style="background:#FEE2E2;">🚪</div>
+          <div class="menu-text" style="color:var(--red);">ออกจากระบบ</div>
+          <div class="menu-arrow">→</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <a href="#" class="nav-item" onclick="navigate('dashboard')"><span class="icon">🏠</span>หน้าแรก</a>
+      <a href="#" class="nav-item" onclick="navigate('jobs')"><span class="icon">📋</span>งาน</a>
+      <a href="#" class="nav-item" onclick="navigate('chat')"><span class="icon">💬</span>แชท</a>
+      <a href="#" class="nav-item" onclick="navigate('wallet')"><span class="icon">💳</span>กระเป๋า</a>
+      <a href="#" class="nav-item active" onclick="navigate('profile')"><span class="icon">👤</span>โปรไฟล์</a>
+    </div>
+
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- JAVASCRIPT -->
+  <!-- ======================================================= -->
+  <script>
+    function navigate(page) {
+      const pages = document.querySelectorAll('[id^="page-"]');
+      pages.forEach(p => p.style.display = 'none');
+
+      const target = document.getElementById('page-' + page);
+      if (target) {
+        target.style.display = 'block';
+        window.scrollTo(0, 0);
+      } else {
+        document.getElementById('page-dashboard').style.display = 'block';
+      }
+      return false;
+    }
+  </script>
+
+</body>
+</html>
