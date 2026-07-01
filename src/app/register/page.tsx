@@ -54,8 +54,8 @@ export default function TechnicianRegisterPage() {
       } else {
         setError(res.message || 'สมัครไม่สำเร็จ ลองใหม่อีกครั้ง')
       }
-    } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่')
+    } catch (err: any) {
+      setError(err.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่')
     } finally {
       setLoading(false)
     }

@@ -24,9 +24,15 @@ class ApiClient {
       ...(options.headers as Record<string, string> || {}),
     }
     if (token) headers['Authorization'] = `Bearer ${token}`
-    return fetch(`${TECH_API_URL}${path}`, { ...options, headers }).then(r => {
-      const data = r.json()
-      return data as Promise<T>
+    const url = `${TECH_API_URL}${path}`
+    return fetch(url, { ...options, headers }).then(async r => {
+      let data: any
+      try { data = await r.json() } catch { data = {} }
+      if (!r.ok) {
+        const msg = data?.message || data?.error || `Server error (${r.status})`
+        throw new Error(msg)
+      }
+      return data as T
     })
   }
 
