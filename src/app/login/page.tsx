@@ -73,6 +73,11 @@ export default function LoginPage() {
         <button className="btn-primary" onClick={handleLogin} disabled={loading}>
           {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
         </button>
+
+        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--text-light)' }}>
+          ยังไม่มีบัญชี?{' '}
+          <a href="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>สมัครสมาชิก</a>
+        </p>
       </div>
     </div>
   )
