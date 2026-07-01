@@ -21,9 +21,11 @@ export default function EditProfilePage() {
     phone: '',
     headline: '',
     bio: '',
+    specializations: '',
     yearsExperience: '',
     hourlyRate: '',
     isAvailable: true,
+    certifications: [] as { name: string; issuer: string; year?: number }[],
   })
 
   useEffect(() => {
@@ -41,9 +43,11 @@ export default function EditProfilePage() {
           phone: meRes.user.phone || '',
           headline: techRes.technician?.headline || '',
           bio: techRes.technician?.bio || '',
+          specializations: techRes.technician?.specializations || '',
           yearsExperience: techRes.technician?.yearsExperience?.toString() || '',
           hourlyRate: techRes.technician?.hourlyRate?.toString() || '',
           isAvailable: techRes.technician?.isAvailable ?? true,
+          certifications: techRes.technician?.certifications || [],
         })
       })
       .finally(() => setLoading(false))
@@ -91,9 +95,11 @@ export default function EditProfilePage() {
       const techRes = await techniciansApi.updateProfile({
         headline: form.headline,
         bio: form.bio,
+        specializations: form.specializations,
         yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : undefined,
         hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : undefined,
         isAvailable: form.isAvailable,
+        certifications: form.certifications,
       })
       if (techRes.success) {
         setSuccess('✅ บันทึกสำเร็จแล้ว!')
@@ -187,6 +193,13 @@ export default function EditProfilePage() {
             value={form.bio} onChange={e => set('bio', e.target.value)}
             style={{ resize: 'vertical' }} />
         </div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>ความสามารถพิเศษ (Specializations)</div>
+          <input className="form-input" placeholder="เช่น ซ่อมแอร์, ติดตั้งแอร์, ล้างแอร์"
+            value={form.specializations}
+            onChange={e => set('specializations', e.target.value)} />
+          <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>คั่นด้วยเครื่องหมาย ลูกน้ำ (,)</div>
+        </div>
         <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>ประสบการณ์ (ปี)</div>
@@ -198,6 +211,43 @@ export default function EditProfilePage() {
             <input className="form-input" type="number" min="0" value={form.hourlyRate}
               onChange={e => set('hourlyRate', e.target.value)} />
           </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>📜 ใบรับรอง / ประกาศนียบัตร</div>
+          {form.certifications.map((cert, i) => (
+            <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+              <input className="form-input" placeholder="ชื่อใบรับรอง เช่น ประกาศนียบัตรช่างยนต์"
+                value={cert.name} onChange={e => {
+                  const updated = [...form.certifications]
+                  updated[i] = { ...updated[i], name: e.target.value }
+                  set('certifications', updated)
+                }}
+                style={{ flex: 2 }} />
+              <input className="form-input" placeholder="สถาบัน เช่น กรมพัฒนาฝีมือแรงงาน"
+                value={cert.issuer} onChange={e => {
+                  const updated = [...form.certifications]
+                  updated[i] = { ...updated[i], issuer: e.target.value }
+                  set('certifications', updated)
+                }}
+                style={{ flex: 2 }} />
+              <input className="form-input" type="number" placeholder="ปี"
+                value={cert.year || ''} onChange={e => {
+                  const updated = [...form.certifications]
+                  updated[i] = { ...updated[i], year: parseInt(e.target.value) || undefined }
+                  set('certifications', updated)
+                }}
+                style={{ flex: 1 }} />
+              <button onClick={() => {
+                const updated = form.certifications.filter((_, j) => j !== i)
+                set('certifications', updated)
+              }}
+                style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 18, cursor: 'pointer', padding: '4px' }}>✕</button>
+            </div>
+          ))}
+          <button onClick={() => set('certifications', [...form.certifications, { name: '', issuer: '', year: undefined }])}
+            style={{ background: 'var(--primary-light)', border: '1px dashed var(--primary)', borderRadius: 8, padding: '8px 14px', fontSize: 13, color: 'var(--primary)', cursor: 'pointer', width: '100%' }}>
+            ➕ เพิ่มใบรับรอง
+          </button>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--card)', borderRadius: 12, marginBottom: 20 }}>
