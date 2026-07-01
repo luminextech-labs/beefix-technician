@@ -24,7 +24,8 @@ class ApiClient {
       ...(options.headers as Record<string, string> || {}),
     }
     if (token) headers['Authorization'] = `Bearer ${token}`
-    const url = `${TECH_API_URL}${path}`
+    // Use relative URL for /api/ paths (local proxy routes), full URL for external
+    const url = path.startsWith('/api/') ? path : `${TECH_API_URL}${path}`
     return fetch(url, { ...options, headers }).then(async r => {
       let data: any
       try { data = await r.json() } catch { data = {} }
