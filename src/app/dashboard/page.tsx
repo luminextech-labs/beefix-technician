@@ -60,9 +60,10 @@ export default function DashboardPage() {
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '80px' }}>
+
       {/* HEADER */}
-      <div style={{ background: 'var(--primary)', padding: '16px 20px 60px', borderRadius: '0 0 24px 24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+      <div style={{ background: 'var(--primary)', padding: '16px 20px 50px', borderRadius: '0 0 24px 24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: 13, color: '#3D2C00', opacity: 0.8 }}>สวัสดีครับ</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#3D2C00' }}>{user?.fullName || 'ช่าง'}</div>
@@ -72,36 +73,55 @@ export default function DashboardPage() {
             <button onClick={() => { authApi.logout(); router.push('/login') }} style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, border: 'none', cursor: 'pointer' }}>🚪</button>
           </div>
         </div>
-        {/* AVAILABILITY TOGGLE */}
-        <div style={{ background: 'rgba(255,255,255,0.3)', borderRadius: 12, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      </div>
+
+      {/* AVAILABILITY TOGGLE — floating card */}
+      <div style={{ padding: '0 16px', marginTop: -30 }}>
+        <div style={{
+          background: 'var(--card)',
+          borderRadius: 14,
+          padding: '14px 16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+          marginBottom: 16,
+        }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#3D2C00' }}>{tech?.isAvailable ? '✅ พร้อมรับงาน' : '⏸ ไม่พร้อมรับงาน'}</div>
-            <div style={{ fontSize: 11, color: '#3D2C00', opacity: 0.8 }}>เปิดรับงานจากลูกค้า</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: tech?.isAvailable ? 'var(--green)' : 'var(--text-light)' }}>
+              {tech?.isAvailable ? '✅  พร้อมรับงาน' : '⏸  ไม่พร้อมรับงาน'}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>เปิดรับงานจากลูกค้า</div>
           </div>
           <button
             onClick={handleToggleAvailable}
             disabled={updatingAvail}
             style={{
-              width: 48, height: 28, borderRadius: 14, border: 'none',
-              background: tech?.isAvailable ? '#16A34A' : '#D1D5DB',
+              width: 52, height: 30, borderRadius: 15, border: 'none',
+              background: tech?.isAvailable ? 'var(--green)' : 'var(--border)',
               position: 'relative', cursor: updatingAvail ? 'default' : 'pointer',
-              transition: 'background 0.2s', opacity: updatingAvail ? 0.7 : 1,
+              transition: 'background 0.25s', opacity: updatingAvail ? 0.7 : 1,
+              flexShrink: 0,
             }}>
             <div style={{
-              width: 22, height: 22, borderRadius: '50%', background: '#fff',
+              width: 24, height: 24, borderRadius: '50%', background: '#fff',
               position: 'absolute', top: 3,
-              left: tech?.isAvailable ? 23 : 3,
-              transition: 'left 0.2s',
+              left: tech?.isAvailable ? 25 : 3,
+              transition: 'left 0.25s',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
             }} />
           </button>
         </div>
-        {/* STATS */}
+      </div>
+
+      {/* STATS */}
+      <div style={{ padding: '0 16px', marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 10 }}>
           {stats.map(s => (
-            <div key={s.label} style={{ flex: 1, background: 'rgba(255,255,255,0.3)', borderRadius: 12, padding: '12px 10px', textAlign: 'center' }}>
-              <div style={{ fontSize: 20, marginBottom: 2 }}>{s.icon}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#3D2C00' }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: '#3D2C00', opacity: 0.8 }}>{s.label}</div>
+            <div key={s.label} style={{ flex: 1, background: 'var(--card)', borderRadius: 12, padding: '14px 8px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+              <div style={{ fontSize: 22, marginBottom: 4 }}>{s.icon}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--primary)' }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
         </div>
