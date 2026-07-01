@@ -35,7 +35,6 @@ export default function TechnicianRegisterPage() {
 
     setLoading(true)
     try {
-      // Register as technician via the shared API
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,18 +46,9 @@ export default function TechnicianRegisterPage() {
           role: 'technician',
         }),
       }).then(r => r.json()) as { success: boolean; message?: string; user: any; token: string }
-        {
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          password: form.password,
-          role: 'technician',
-        }
-      )
 
       if (res.success) {
         authApi.setToken(res.token)
-        // Redirect to onboarding in the main beefix-web app
         window.location.href = 'https://beefix-web.vercel.app/technician/onboarding'
       } else {
         setError(res.message || 'สมัครไม่สำเร็จ ลองใหม่อีกครั้ง')
