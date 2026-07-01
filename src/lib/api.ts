@@ -1,4 +1,4 @@
-const TECH_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+const TECH_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://beefix-web.vercel.app'
 
 class ApiClient {
   setToken(token: string | null) {
