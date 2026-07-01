@@ -44,6 +44,9 @@ class ApiClient {
   patch<T>(path: string, body?: unknown) {
     return this.request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
   }
+  delete<T>(path: string) {
+    return this.request<T>(path, { method: 'DELETE' })
+  }
 }
 
 export const api = new ApiClient()
@@ -89,4 +92,23 @@ export const notificationsApi = {
   get: () => api.get<{ success: boolean; notifications: any[]; unreadCount: number }>('/api/notifications'),
   markRead: (id: string) => api.patch<{ success: boolean }>('/api/notifications', { id }),
   markAllRead: () => api.patch<{ success: boolean }>('/api/notifications', { markAllRead: true }),
+}
+
+// Technicians (profile)
+export const techniciansApi = {
+  me: () => api.get<{ success: boolean; technician: any; stats: any }>('/api/technicians/me'),
+  updateProfile: (data: any) => api.patch<{ success: boolean; technician: any }>('/api/technicians/me', data),
+}
+
+// Services
+export const servicesApi = {
+  getAll: () => api.get<{ success: boolean; services: any[] }>('/api/technicians/services'),
+  add: (data: any) => api.post<{ success: boolean; service: any }>('/api/technicians/services', data),
+  remove: (serviceId: string) => api.delete<{ success: boolean }>(`/api/technicians/services?id=${serviceId}`),
+}
+
+// Reviews
+export const reviewsApi = {
+  getByTechnician: (technicianId: string) =>
+    api.get<{ success: boolean; reviews: any[]; pagination: any }>(`/api/reviews?technicianId=${technicianId}`),
 }
