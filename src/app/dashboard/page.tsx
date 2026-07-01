@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { authApi, ordersApi, walletApi } from '@/lib/api'
+import { authApi, ordersApi, walletApi, techniciansApi } from '@/lib/api'
 
 interface Stat { label: string; value: string | number; icon: string }
 interface Order { id: string; orderNo: string; title: string; status: string; jobDate: string; totalAmount: string }
@@ -10,9 +10,11 @@ interface Order { id: string; orderNo: string; title: string; status: string; jo
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [tech, setTech] = useState<any>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [walletBal, setWalletBal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [updatingAvail, setUpdatingAvail] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('tech_token')
@@ -22,10 +24,12 @@ export default function DashboardPage() {
       authApi.me(),
       ordersApi.getAll(),
       walletApi.get(),
-    ]).then(([meRes, ordersRes, walletRes]) => {
+      techniciansApi.me(),
+    ]).then(([meRes, ordersRes, walletRes, techRes]) => {
       if (meRes.success) setUser(meRes.user)
       if (ordersRes.success) setOrders(ordersRes.orders.slice(0, 5))
       if (walletRes.success) setWalletBal(Number(walletRes.wallet?.balance || 0))
+      if (techRes.success) setTech(techRes.technician)
     }).catch(() => router.replace('/login'))
     .finally(() => setLoading(false))
   }, [router])
@@ -43,6 +47,17 @@ export default function DashboardPage() {
     { label: 'ยอดเงิน', value: `฿${walletBal.toLocaleString()}`, icon: '💰' },
   ]
 
+  const handleToggleAvailable = async () => {
+    if (!tech || updatingAvail) return
+    setUpdatingAvail(true)
+    try {
+      const res = await techniciansApi.updateProfile({ isAvailable: !tech.isAvailable })
+      if (res.success) setTech((t: any) => ({ ...t, isAvailable: !t.isAvailable }))
+    } finally {
+      setUpdatingAvail(false)
+    }
+  }
+
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '80px' }}>
       {/* HEADER */}
@@ -56,6 +71,29 @@ export default function DashboardPage() {
             <Link href="/notifications" style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🔔</Link>
             <button onClick={() => { authApi.logout(); router.push('/login') }} style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, border: 'none', cursor: 'pointer' }}>🚪</button>
           </div>
+        </div>
+        {/* AVAILABILITY TOGGLE */}
+        <div style={{ background: 'rgba(255,255,255,0.3)', borderRadius: 12, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#3D2C00' }}>{tech?.isAvailable ? '✅ พร้อมรับงาน' : '⏸ ไม่พร้อมรับงาน'}</div>
+            <div style={{ fontSize: 11, color: '#3D2C00', opacity: 0.8 }}>เปิดรับงานจากลูกค้า</div>
+          </div>
+          <button
+            onClick={handleToggleAvailable}
+            disabled={updatingAvail}
+            style={{
+              width: 48, height: 28, borderRadius: 14, border: 'none',
+              background: tech?.isAvailable ? '#16A34A' : '#D1D5DB',
+              position: 'relative', cursor: updatingAvail ? 'default' : 'pointer',
+              transition: 'background 0.2s', opacity: updatingAvail ? 0.7 : 1,
+            }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: '50%', background: '#fff',
+              position: 'absolute', top: 3,
+              left: tech?.isAvailable ? 23 : 3,
+              transition: 'left 0.2s',
+            }} />
+          </button>
         </div>
         {/* STATS */}
         <div style={{ display: 'flex', gap: 10 }}>
