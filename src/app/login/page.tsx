@@ -15,12 +15,17 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await authApi.login({ email, password })
-      if (res.success && res.user.role === 'technician') {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      }).then(r => r.json())
+
+      if (res.success && res.user?.role === 'technician') {
         authApi.setToken(res.token)
         router.push('/dashboard')
       } else {
-        setError('ไม่พบบัญชีช่าง หรือรหัสผ่านไม่ถูกต้อง')
+        setError(res.message || 'ไม่พบบัญชีช่าง หรือรหัสผ่านไม่ถูกต้อง')
       }
     } catch {
       setError('เข้าสู่ระบบไม่สำเร็จ ลองใหม่')

@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { api, authApi } from '@/lib/api'
+import { authApi } from '@/lib/api'
 
 export default function TechnicianRegisterPage() {
   const router = useRouter()
@@ -36,8 +36,17 @@ export default function TechnicianRegisterPage() {
     setLoading(true)
     try {
       // Register as technician via the shared API
-      const res = await api.post<{ success: boolean; message?: string; user: any; token: string }>(
-        '/api/auth/register',
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: form.fullName,
+          email: form.email,
+          phone: form.phone,
+          password: form.password,
+          role: 'technician',
+        }),
+      }).then(r => r.json()) as { success: boolean; message?: string; user: any; token: string }
         {
           fullName: form.fullName,
           email: form.email,
