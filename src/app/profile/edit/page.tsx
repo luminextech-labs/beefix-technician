@@ -1,19 +1,22 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { authApi, techniciansApi } from '@/lib/api'
+import { authApi, techniciansApi, uploadApi } from '@/lib/api'
 
 export default function EditProfilePage() {
   const router = useRouter()
+  const fileRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploadingImg, setUploadingImg] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState('')
   const [user, setUser] = useState<any>(null)
   const [tech, setTech] = useState<any>(null)
 
   const [form, setForm] = useState({
+    avatarUrl: '',
     fullName: '',
     phone: '',
     headline: '',
@@ -33,6 +36,7 @@ export default function EditProfilePage() {
         setUser(meRes.user)
         if (techRes.success) setTech(techRes.technician)
         setForm({
+          avatarUrl: meRes.user.avatarUrl || '',
           fullName: meRes.user.fullName || '',
           phone: meRes.user.phone || '',
           headline: techRes.technician?.headline || '',
@@ -45,25 +49,57 @@ export default function EditProfilePage() {
       .finally(() => setLoading(false))
   }, [router])
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingImg(true)
+    setError('')
+    try {
+      const res = await uploadApi.image(file, 'avatars')
+      if (res.success && res.url) {
+        setForm(f => ({ ...f, avatarUrl: res.url }))
+      } else {
+        setError('อัปโหลดรูปไม่สำเร็จ')
+      }
+    } catch (e: any) {
+      setError(e.message || 'เกิดข้อผิดพลาด')
+    } finally {
+      setUploadingImg(false)
+    }
+  }
+
   const handleSave = async () => {
     setError('')
-    setSuccess(false)
+    setSuccess('')
     if (!form.fullName.trim()) { setError('กรุณากรอกชื่อ'); return }
     if (!form.phone.trim()) { setError('กรุณากรอกเบอร์โทร'); return }
     setSaving(true)
     try {
-      const res = await techniciansApi.updateProfile({
+      // Update avatar via profile API
+      const profileRes = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarUrl: form.avatarUrl, fullName: form.fullName, phone: form.phone }),
+      }).then(r => r.json())
+
+      if (!profileRes.success) {
+        setError(profileRes.message || 'บันทึกไม่สำเร็จ')
+        setSaving(false)
+        return
+      }
+
+      const techRes = await techniciansApi.updateProfile({
         headline: form.headline,
         bio: form.bio,
         yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : undefined,
         hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : undefined,
         isAvailable: form.isAvailable,
       })
-      if (res.success) {
-        setSuccess(true)
-        setTimeout(() => setSuccess(false), 3000)
+      if (techRes.success) {
+        setSuccess('✅ บันทึกสำเร็จแล้ว!')
+        setTimeout(() => setSuccess(''), 3000)
       } else {
-        setError(res.message || 'บันทึกไม่สำเร็จ')
+        setError(techRes.message || 'บันทึกไม่สำเร็จ')
       }
     } catch (e: any) {
       setError(e.message || 'เกิดข้อผิดพลาด')
@@ -91,7 +127,7 @@ export default function EditProfilePage() {
       <div style={{ padding: 20 }}>
         {success && (
           <div style={{ background: '#D1FAE5', color: '#065F46', padding: '12px 16px', borderRadius: 10, fontSize: 14, marginBottom: 16 }}>
-            ✅ บันทึกสำเร็จแล้ว!
+            {success}
           </div>
         )}
         {error && (
@@ -99,6 +135,35 @@ export default function EditProfilePage() {
             {error}
           </div>
         )}
+
+        {/* AVATAR */}
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <div style={{
+              width: 100, height: 100, borderRadius: '50%',
+              background: 'var(--primary-light)', border: '3px solid var(--primary)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 40, overflow: 'hidden', cursor: 'pointer',
+            }} onClick={() => !uploadingImg && fileRef.current?.click()}>
+              {uploadingImg ? (
+                <div style={{ fontSize: 24 }}>⏳</div>
+              ) : form.avatarUrl ? (
+                <img src={form.avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <span>{form.fullName?.charAt(0) || '?'}</span>
+              )}
+            </div>
+            <div style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 32, height: 32, borderRadius: '50%',
+              background: 'var(--primary)', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, border: '2px solid white',
+            }}>📷</div>
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
+          <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 8 }}>แตะเปลี่ยนรูปโปรไฟล์</div>
+        </div>
 
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>ชื่อ-นามสกุล</div>

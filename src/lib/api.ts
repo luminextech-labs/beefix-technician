@@ -47,6 +47,18 @@ class ApiClient {
   delete<T>(path: string) {
     return this.request<T>(path, { method: 'DELETE' })
   }
+  upload<T>(path: string, formData: FormData): Promise<T> {
+    const token = this.getToken()
+    const headers: Record<string, string> = {}
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    const url = path.startsWith('/api/') ? path : `${TECH_API_URL}${path}`
+    return fetch(url, { method: 'POST', headers, body: formData } as any).then(async r => {
+      let data: any
+      try { data = await r.json() } catch { data = {} }
+      if (!r.ok) throw new Error(data?.message || `Server error (${r.status})`)
+      return data as T
+    })
+  }
 }
 
 export const api = new ApiClient()
@@ -111,4 +123,14 @@ export const servicesApi = {
 export const reviewsApi = {
   getByTechnician: (technicianId: string) =>
     api.get<{ success: boolean; reviews: any[]; pagination: any }>(`/api/reviews?technicianId=${technicianId}`),
+}
+
+// Upload
+export const uploadApi = {
+  image: (file: File, folder = 'avatars') => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', folder)
+    return api.upload<{ success: boolean; url: string }>('/api/upload', formData)
+  },
 }
