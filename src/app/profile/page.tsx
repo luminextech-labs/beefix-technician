@@ -50,12 +50,17 @@ export default function ProfilePage() {
         {tech?.certifications?.length > 0 && (
           <div className="card-shadow" style={{ padding: 14, marginBottom: 12, borderRadius: 12 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-light)', marginBottom: 8 }}>📜 ใบรับรอง / ประกาศนียบัตร</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {tech.certifications.map((cert: any, i: number) => (
-                <div key={i} style={{ fontSize: 13 }}>
-                  <span style={{ fontWeight: 600 }}>🏅 {cert.name}</span>
-                  {cert.issuer && <span style={{ color: 'var(--text-light)' }}> — {cert.issuer}</span>}
-                  {cert.year && <span style={{ color: 'var(--text-light)' }}> ({cert.year})</span>}
+                <div key={i} style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 12px', border: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>🏅 {cert.name}</div>
+                  {cert.issuer && <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>{cert.issuer}{cert.year ? ` · ปี ${cert.year}` : ''}</div>}
+                  {cert.fileUrl && (
+                    <a href={cert.fileUrl} target="_blank" rel="noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 6, fontSize: 12, color: 'var(--primary)', fontWeight: 600 }}>
+                      📎 ดูไฟล์แนบ
+                    </a>
+                  )}
                 </div>
               ))}
             </div>

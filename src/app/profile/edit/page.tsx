@@ -25,8 +25,11 @@ export default function EditProfilePage() {
     yearsExperience: '',
     hourlyRate: '',
     isAvailable: true,
-    certifications: [] as { name: string; issuer: string; year?: number }[],
+    certifications: [] as { name: string; issuer: string; year?: number; fileUrl?: string }[],
   })
+
+  const certFileRef = useRef<HTMLInputElement>(null)
+  const [uploadingCertIndex, setUploadingCertIndex] = useState<number | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('tech_token')
@@ -69,6 +72,23 @@ export default function EditProfilePage() {
       setError(e.message || 'เกิดข้อผิดพลาด')
     } finally {
       setUploadingImg(false)
+    }
+  }
+
+  const handleCertFileChange = async (e: React.ChangeEvent<HTMLInputElement>, certIndex: number) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingCertIndex(certIndex)
+    try {
+      const res = await uploadApi.image(file, 'certifications')
+      if (res.success && res.url) {
+        const updated = [...form.certifications]
+        updated[certIndex] = { ...updated[certIndex], fileUrl: res.url }
+        set('certifications', updated)
+      }
+    } finally {
+      setUploadingCertIndex(null)
+      if (certFileRef.current) certFileRef.current.value = ''
     }
   }
 
@@ -214,37 +234,84 @@ export default function EditProfilePage() {
         </div>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>📜 ใบรับรอง / ประกาศนียบัตร</div>
+          <input
+            ref={certFileRef}
+            type="file"
+            accept="image/*,.pdf"
+            style={{ display: 'none' }}
+            onChange={e => {
+              if (uploadingCertIndex !== null) handleCertFileChange(e, uploadingCertIndex)
+            }}
+          />
           {form.certifications.map((cert, i) => (
-            <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
-              <input className="form-input" placeholder="ชื่อใบรับรอง เช่น ประกาศนียบัตรช่างยนต์"
-                value={cert.name} onChange={e => {
-                  const updated = [...form.certifications]
-                  updated[i] = { ...updated[i], name: e.target.value }
+            <div key={i} style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 12, padding: 12, marginBottom: 10 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                <input className="form-input" placeholder="ชื่อใบรับรอง เช่น ประกาศนียบัตรช่างยนต์"
+                  value={cert.name} onChange={e => {
+                    const updated = [...form.certifications]
+                    updated[i] = { ...updated[i], name: e.target.value }
+                    set('certifications', updated)
+                  }}
+                  style={{ flex: 2 }} />
+                <button onClick={() => {
+                  const updated = form.certifications.filter((_, j) => j !== i)
                   set('certifications', updated)
                 }}
-                style={{ flex: 2 }} />
-              <input className="form-input" placeholder="สถาบัน เช่น กรมพัฒนาฝีมือแรงงาน"
-                value={cert.issuer} onChange={e => {
-                  const updated = [...form.certifications]
-                  updated[i] = { ...updated[i], issuer: e.target.value }
-                  set('certifications', updated)
-                }}
-                style={{ flex: 2 }} />
-              <input className="form-input" type="number" placeholder="ปี"
-                value={cert.year || ''} onChange={e => {
-                  const updated = [...form.certifications]
-                  updated[i] = { ...updated[i], year: parseInt(e.target.value) || undefined }
-                  set('certifications', updated)
-                }}
-                style={{ flex: 1 }} />
-              <button onClick={() => {
-                const updated = form.certifications.filter((_, j) => j !== i)
-                set('certifications', updated)
-              }}
-                style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 18, cursor: 'pointer', padding: '4px' }}>✕</button>
+                  style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 16, cursor: 'pointer', padding: '4px', flexShrink: 0 }}>✕</button>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <input className="form-input" placeholder="สถาบัน เช่น กรมพัฒนาฝีมือแรงงาน"
+                  value={cert.issuer} onChange={e => {
+                    const updated = [...form.certifications]
+                    updated[i] = { ...updated[i], issuer: e.target.value }
+                    set('certifications', updated)
+                  }}
+                  style={{ flex: 2 }} />
+                <input className="form-input" type="number" placeholder="ปี"
+                  value={cert.year || ''} onChange={e => {
+                    const updated = [...form.certifications]
+                    updated[i] = { ...updated[i], year: parseInt(e.target.value) || undefined }
+                    set('certifications', updated)
+                  }}
+                  style={{ flex: 1 }} />
+              </div>
+              {/* FILE UPLOAD */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  onClick={() => { setUploadingCertIndex(i); certFileRef.current?.click() }}
+                  disabled={uploadingCertIndex === i}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    border: '1px dashed var(--primary)',
+                    background: cert.fileUrl ? 'var(--primary-light)' : 'transparent',
+                    color: 'var(--primary)',
+                    fontSize: 12,
+                    cursor: uploadingCertIndex === i ? 'default' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}>
+                  {uploadingCertIndex === i ? (
+                    '⏳ กำลังอัปโหลด...'
+                  ) : cert.fileUrl ? (
+                    <span>📎 อัปโหลดแล้ว</span>
+                  ) : (
+                    <span>📎 แนบไฟล์ (รูป / PDF)</span>
+                  )}
+                </button>
+                {cert.fileUrl && (
+                  <a href={cert.fileUrl} target="_blank" rel="noreferrer"
+                    style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, whiteSpace: 'nowrap', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    👁 ดูไฟล์
+                  </a>
+                )}
+              </div>
             </div>
           ))}
-          <button onClick={() => set('certifications', [...form.certifications, { name: '', issuer: '', year: undefined }])}
+          <button onClick={() => set('certifications', [...form.certifications, { name: '', issuer: '', year: undefined, fileUrl: undefined }])}
             style={{ background: 'var(--primary-light)', border: '1px dashed var(--primary)', borderRadius: 8, padding: '8px 14px', fontSize: 13, color: 'var(--primary)', cursor: 'pointer', width: '100%' }}>
             ➕ เพิ่มใบรับรอง
           </button>
