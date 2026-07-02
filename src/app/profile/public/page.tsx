@@ -1,0 +1,172 @@
+'use client'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { techniciansApi, servicesApi } from '@/lib/api'
+
+export default function PublicProfilePage() {
+  const searchParams = useSearchParams()
+  const techId = searchParams.get('techId')
+  const [tech, setTech] = useState<any>(null)
+  const [services, setServices] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!techId) { setError('ไม่พบ ID ช่าง'); setLoading(false); return }
+    Promise.all([
+      techniciansApi.getPublicProfile(techId),
+      servicesApi.getAll(),
+    ]).then(([techRes, svcRes]) => {
+      if (techRes.success) setTech(techRes.technician)
+      if (svcRes.success) setServices(svcRes.services)
+    }).catch(() => setError('โหลดโปรไฟล์ไม่ได้'))
+    .finally(() => setLoading(false))
+  }, [techId])
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
+      <div style={{ textAlign: 'center' }}><div style={{ fontSize: 48, marginBottom: 8 }}>👨‍🔧</div><div>กำลังโหลด...</div></div>
+    </div>
+  )
+
+  if (error || !tech) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
+      <div style={{ textAlign: 'center' }}><div style={{ fontSize: 48, marginBottom: 8 }}>😕</div><div>{error || 'ไม่พบโปรไฟล์'}</div></div>
+    </div>
+  )
+
+  const user = tech.user
+
+  return (
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 40 }}>
+      {/* HEADER */}
+      <div style={{ background: 'var(--primary)', padding: '16px 20px 60px', borderRadius: '0 0 24px 24px', textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 12 }}>
+          <Link href="/profile" style={{ color: '#3D2C00', fontSize: 20 }}>← กลับ</Link>
+        </div>
+        <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--primary-dark)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, overflow: 'hidden', border: '3px solid rgba(255,255,255,0.5)' }}>
+          {user?.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user?.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <span>{user?.fullName?.charAt(0) || '?'}</span>
+          )}
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: '#3D2C00' }}>{user?.fullName}</div>
+        {tech.headline && <div style={{ fontSize: 13, color: '#3D2C00', opacity: 0.85, marginTop: 4 }}>{tech.headline}</div>}
+        {tech.specializations && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 8 }}>
+            {tech.specializations.split(',').map((spec: string, i: number) => (
+              <span key={i} style={{ background: 'rgba(255,255,255,0.3)', borderRadius: 20, padding: '2px 10px', fontSize: 11, color: '#3D2C00' }}>{spec.trim()}</span>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 12 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#3D2C00' }}>⭐ {Number(tech.ratingAvg || 0).toFixed(1)}</div>
+            <div style={{ fontSize: 10, color: '#3D2C00', opacity: 0.7 }}>คะแนนเฉลี่ย</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#3D2C00' }}>{tech.ratingCount || 0}</div>
+            <div style={{ fontSize: 10, color: '#3D2C00', opacity: 0.7 }}>รีวิว</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#3D2C00' }}>{tech.yearsExperience || 0}</div>
+            <div style={{ fontSize: 10, color: '#3D2C00', opacity: 0.7 }}>ปีประสบการณ์</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: '0 16px', marginTop: -30 }}>
+
+        {/* BLOCK 1: เกี่ยวกับช่าง */}
+        <div className="card-shadow" style={{ padding: 16, marginBottom: 12, borderRadius: 14 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>👤 เกี่ยวกับช่าง</div>
+          <div style={{ fontSize: 13, color: 'var(--text-light)', lineHeight: 1.6 }}>
+            {tech.bio || 'ยังไม่มีรายละเอียด'}
+          </div>
+          {tech.hourlyRate && (
+            <div style={{ marginTop: 10, fontSize: 14, fontWeight: 700, color: 'var(--primary)' }}>
+              💰 ค่าแรง {tech.hourlyRate} บาท/ชม.
+            </div>
+          )}
+        </div>
+
+        {/* BLOCK 2: บริการ */}
+        {services.length > 0 && (
+          <div className="card-shadow" style={{ padding: 16, marginBottom: 12, borderRadius: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>🔧 บริการ</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {services.map(svc => (
+                <div key={svc.id} style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 12px' }}>
+                  {svc.images && svc.images.length > 0 && (
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 8, overflowX: 'auto' }}>
+                      {svc.images.map((img: string, i: number) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={i} src={img} alt="" style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{svc.subCategory?.name}</div>
+                  {svc.description && <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>{svc.description}</div>}
+                  {svc.basePrice != null && (
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>฿{svc.basePrice.toLocaleString()}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* BLOCK 3: ใบรับรอง / เซอร์ */}
+        {(tech.certifications?.length > 0 || tech.specializations) && (
+          <div className="card-shadow" style={{ padding: 16, marginBottom: 12, borderRadius: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>🏅 ความสามารถ & ใบรับรอง</div>
+            {tech.specializations && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                {tech.specializations.split(',').map((spec: string, i: number) => (
+                  <span key={i} style={{ background: 'var(--primary-light)', color: '#8B6914', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 600 }}>{spec.trim()}</span>
+                ))}
+              </div>
+            )}
+            {tech.certifications?.map((cert: any, i: number) => (
+              <div key={i} style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 12px', marginBottom: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>🏅 {cert.name}</div>
+                {cert.issuer && <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>{cert.issuer}{cert.year ? ` · ปี ${cert.year}` : ''}</div>}
+                {cert.fileUrl && (
+                  <a href={cert.fileUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, marginTop: 4, display: 'inline-block' }}>
+                    📎 ดูไฟล์แนบ
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* BLOCK 4: ผลงาน */}
+        {tech.portfolioItems?.length > 0 && (
+          <div className="card-shadow" style={{ padding: 16, marginBottom: 12, borderRadius: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>🖼️ ผลงานที่ผ่านมา</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+              {tech.portfolioItems.map((item: any) => (
+                <div key={item.id} style={{ borderRadius: 10, overflow: 'hidden', background: 'var(--bg)' }}>
+                  {item.images?.[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.images[0]} alt={item.title} style={{ width: '100%', height: 100, objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>🖼️</div>
+                  )}
+                  <div style={{ padding: '8px 8px 8px' }}>
+                    <div style={{ fontSize: 12, fontWeight: 700 }}>{item.title}</div>
+                    {item.description && <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 2 }}>{item.description}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  )
+}

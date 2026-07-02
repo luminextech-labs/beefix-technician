@@ -95,6 +95,15 @@ export default function ProfilePage() {
           <Link href="/profile/reviews">
             <div className="menu-item"><span style={{ fontSize: 20 }}>⭐</span><span style={{ fontSize: 14, fontWeight: 600 }}>ดูรีวิว</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
           </Link>
+          <Link href="/profile/categories">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>📂</span><span style={{ fontSize: 14, fontWeight: 600 }}>หมวดหมู่ของฉัน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          </Link>
+          <Link href="/profile/portfolio">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>🖼️</span><span style={{ fontSize: 14, fontWeight: 600 }}>ผลงาน / Portfolio</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          </Link>
+          <Link href={`/profile/public?techId=${tech?.id}`} target="_blank">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>🌐</span><span style={{ fontSize: 14, fontWeight: 600 }}>ดูโปรไฟล์สาธารณะ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          </Link>
         </div>
 
         <div className="card-shadow" style={{ overflow: 'hidden', marginBottom: 16, borderRadius: 16 }}>

@@ -110,6 +110,7 @@ export const notificationsApi = {
 export const techniciansApi = {
   me: () => api.get<{ success: boolean; technician: any; stats: any }>('/api/technicians/me'),
   updateProfile: (data: any) => api.patch<{ success: boolean; technician: any }>('/api/technicians/me', data),
+  getPublicProfile: (techId: string) => api.get<{ success: boolean; technician: any }>(`/api/technicians/${techId}/public`),
 }
 
 // Services
@@ -125,8 +126,12 @@ export const reviewsApi = {
     api.get<{ success: boolean; reviews: any[]; pagination: any }>(`/api/reviews?technicianId=${technicianId}`),
 }
 
+// Categories (public, no auth needed)
+export const categoriesApi = {
+  getAll: () => api.get<{ success: boolean; categories: any[] }>('/api/categories'),
+}
+
 // Upload
-export const uploadApi = {
   image: (file: File, folder = 'avatars') => {
     const formData = new FormData()
     formData.append('file', file)
