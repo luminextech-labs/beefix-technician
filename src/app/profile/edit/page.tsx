@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { authApi, techniciansApi, uploadApi } from '@/lib/api'
+import { authApi, techniciansApi, uploadApi, categoriesApi } from '@/lib/api'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -26,7 +26,12 @@ export default function EditProfilePage() {
     hourlyRate: '',
     isAvailable: true,
     certifications: [] as { name: string; issuer: string; year?: number; fileUrl?: string }[],
+    tradeTypes: [] as string[],
   })
+
+  const DEFAULT_TRADES = ['ช่างยนต์', 'ช่างไฟฟ้า', 'ช่างประปา', 'ช่างแอร์', 'ช่างคอมพิวเตอร์', 'ช่างก่อสร้าง', 'ช่างเฟอร์นิเจอร์', 'ช่างสี', 'ช่างกล้อง', 'ช่างอื่นๆ']
+  const [systemCategories, setSystemCategories] = useState<string[]>([])
+  const [showTradeEditor, setShowTradeEditor] = useState(false)
 
   const certFileRef = useRef<HTMLInputElement>(null)
   const [uploadingCertIndex, setUploadingCertIndex] = useState<number | null>(null)
@@ -35,22 +40,29 @@ export default function EditProfilePage() {
     const token = localStorage.getItem('tech_token')
     if (!token) { router.replace('/login'); return }
 
-    Promise.all([authApi.me(), techniciansApi.me()])
+    Promise.all([authApi.me(), techniciansApi.me(), categoriesApi.getAll()])
       .then(([meRes, techRes]) => {
         if (!meRes.success) { router.replace('/login'); return }
         setUser(meRes.user)
         if (techRes.success) setTech(techRes.technician)
+        const existingSpecs = techRes.technician?.specializations || ''
+        const parsedTrades = existingSpecs ? existingSpecs.split(',').map((s: string) => s.trim()).filter(Boolean) : []
+        if (catRes.success) {
+          const sysNames = (catRes.categories || []).map((c: any) => c.name)
+          setSystemCategories(sysNames)
+        }
         setForm({
           avatarUrl: meRes.user.avatarUrl || '',
           fullName: meRes.user.fullName || '',
           phone: meRes.user.phone || '',
           headline: techRes.technician?.headline || '',
           bio: techRes.technician?.bio || '',
-          specializations: techRes.technician?.specializations || '',
+          specializations: existingSpecs,
           yearsExperience: techRes.technician?.yearsExperience?.toString() || '',
           hourlyRate: techRes.technician?.hourlyRate?.toString() || '',
           isAvailable: techRes.technician?.isAvailable ?? true,
           certifications: techRes.technician?.certifications || [],
+          tradeTypes: parsedTrades,
         })
       })
       .finally(() => setLoading(false))
@@ -115,7 +127,7 @@ export default function EditProfilePage() {
       const techRes = await techniciansApi.updateProfile({
         headline: form.headline,
         bio: form.bio,
-        specializations: form.specializations,
+        specializations: form.tradeTypes.length > 0 ? form.tradeTypes.join(', ') : form.specializations,
         yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : undefined,
         hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : undefined,
         isAvailable: form.isAvailable,
@@ -135,6 +147,20 @@ export default function EditProfilePage() {
   }
 
   const set = (key: string, val: any) => setForm(f => ({ ...f, [key]: val }))
+
+  const toggleTrade = (name: string) => {
+    setForm(f => ({
+      ...f,
+      tradeTypes: f.tradeTypes.includes(name)
+        ? f.tradeTypes.filter(t => t !== name)
+        : [...f.tradeTypes, name],
+    }))
+  }
+
+  const allTradeOptions = [
+    ...DEFAULT_TRADES,
+    ...systemCategories,
+  ]
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
@@ -213,12 +239,43 @@ export default function EditProfilePage() {
             value={form.bio} onChange={e => set('bio', e.target.value)}
             style={{ resize: 'vertical' }} />
         </div>
+
+        {/* TRADE TYPES */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>ความสามารถพิเศษ (Specializations)</div>
-          <input className="form-input" placeholder="เช่น ซ่อมแอร์, ติดตั้งแอร์, ล้างแอร์"
-            value={form.specializations}
-            onChange={e => set('specializations', e.target.value)} />
-          <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>คั่นด้วยเครื่องหมาย ลูกน้ำ (,)</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>🔧 ประเภทช่าง</div>
+            <button type="button" onClick={() => setShowTradeEditor(s => !s)}
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              {showTradeEditor ? 'เสร็จ' : 'แก้ไข'}
+            </button>
+          </div>
+          {showTradeEditor ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {allTradeOptions.map(name => {
+                const selected = form.tradeTypes.includes(name)
+                return (
+                  <button type="button" key={name}
+                    onClick={() => toggleTrade(name)}
+                    style={{
+                      padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                      border: selected ? '2px solid var(--primary)' : '1.5px solid var(--border)',
+                      background: selected ? 'var(--primary-light)' : 'var(--bg)',
+                      color: selected ? '#8B6914' : 'var(--text)', cursor: 'pointer',
+                    }}>
+                    {selected ? '✓ ' : ''}{name}
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {form.tradeTypes.length === 0 ? (
+                <span style={{ fontSize: 12, color: 'var(--text-light)' }}>ยังไม่ได้เลือก</span>
+              ) : form.tradeTypes.map(t => (
+                <span key={t} style={{ background: 'var(--primary-light)', color: '#8B6914', borderRadius: 20, padding: '4px 10px', fontSize: 12, fontWeight: 600 }}>{t}</span>
+              ))}
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
           <div style={{ flex: 1 }}>
