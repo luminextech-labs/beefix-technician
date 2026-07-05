@@ -11,6 +11,19 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     })
     const data = await res.json()
+
+    // Set httpOnly cookie on successful registration so middleware can auth
+    if (data.success && data.token) {
+      const response = NextResponse.json(data, { status: res.status })
+      response.cookies.set('tech_token', data.token, {
+        httpOnly: false,
+        secure: true,
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      })
+      return response
+    }
+
     return NextResponse.json(data, { status: res.status })
   } catch (err) {
     return NextResponse.json({ success: false, message: 'เกิดข้อผิดพลาด กรุณาลองใหม่' }, { status: 500 })
