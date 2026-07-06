@@ -12,6 +12,8 @@ export default function EditProfilePage() {
   const [saving, setSaving] = useState(false)
   const [uploadingImg, setUploadingImg] = useState(false)
   const [error, setError] = useState('')
+  const [locating, setLocating] = useState(false)
+  const [locError, setLocError] = useState('')
   const [success, setSuccess] = useState('')
   const [user, setUser] = useState<any>(null)
   const [tech, setTech] = useState<any>(null)
@@ -91,6 +93,28 @@ export default function EditProfilePage() {
     } finally {
       setUploadingImg(false)
     }
+  }
+
+const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocError('เบราว์เซอร์ไม่รองรับ GPS')
+      return
+    }
+    setLocating(true)
+    setLocError('')
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setForm(f => ({ ...f, latitude: String(lat), longitude: String(lng) }))
+        setLocating(false)
+      },
+      () => {
+        setLocError('ไม่สามารถระบุตำแหน่งได้ กรุณาอนุญาตเข้าถึงตำแหน่ง')
+        setLocating(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
   }
 
 const handleSave = async () => {
@@ -285,37 +309,58 @@ const handleSave = async () => {
         {/* Location */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>📍 พิกัดที่ตั้ง (สำหรับจับคู่ลูกค้าใกล้ช่าง)</div>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <input
-              className="form-input"
-              type="number"
-              step="any"
-              placeholder="ละติจูด เช่น 13.7563"
-              value={form.latitude}
-              onChange={e => set('latitude', e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <input
-              className="form-input"
-              type="number"
-              step="any"
-              placeholder="ลองจิจูด เช่น 100.5018"
-              value={form.longitude}
-              onChange={e => set('longitude', e.target.value)}
-              style={{ flex: 1 }}
-            />
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>
-            💡 ดูพิกัดได้จาก Google Maps — คลิกขวาที่ตำแหน่งของคุณ → ค่าพิกัด
-          </div>
-          {form.latitude && form.longitude && (
-            <button
-              type="button"
-              onClick={() => set({ latitude: '', longitude: '' })}
-              style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 11, cursor: 'pointer', marginTop: 4 }}
-            >
-              ล้างพิกัด
-            </button>
+          <button
+            type="button"
+            onClick={handleGetLocation}
+            disabled={locating}
+            style={{
+              width: '100%', padding: '13px', borderRadius: 14,
+              border: '2px solid var(--primary)',
+              background: locating ? 'var(--primary-light)' : 'linear-gradient(135deg, #FFF0B3 0%, #FFF8E7 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              fontSize: 15, fontWeight: 700, color: '#8B6914',
+              cursor: locating ? 'not-allowed' : 'pointer',
+              boxShadow: '0 3px 12px rgba(255,184,0,0.2)', marginBottom: 8,
+            }}
+          >
+            {locating ? (
+              <>🧭 กำลังระบุตำแหน่ง...</>
+            ) : form.latitude && form.longitude ? (
+              <>🔄 อัปเดตตำแหน่งจาก GPS</>
+            ) : (
+              <>📍 ปักหมุดที่อยู่ปัจจุบัน (GPS)</>
+            )}
+          </button>
+          {locError && (
+            <div style={{ fontSize: 12, color: '#DC2626', marginTop: 4, textAlign: 'center' }}>{locError}</div>
+          )}
+          {/* Map preview */}
+          {form.latitude && form.longitude ? (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ borderRadius: 14, overflow: 'hidden', height: 150, border: '1.5px solid var(--border)', position: 'relative' }}>
+                <iframe
+                  title="map"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, position: 'absolute', top: 0, left: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(form.longitude) - 0.005},${Number(form.latitude) - 0.003},${Number(form.longitude) + 0.005},${Number(form.latitude) + 0.003}&layer=mapnik&marker=${form.latitude},${form.longitude}`}
+                />
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 5, textAlign: 'right' }}>
+                📍 {Number(form.latitude).toFixed(6)}, {Number(form.longitude).toFixed(6)}
+              </div>
+              <button type="button" onClick={() => set({ latitude: '', longitude: '' })}
+                style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 11, cursor: 'pointer', marginTop: 4 }}>
+                ล้างพิกัด
+              </button>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, color: 'var(--text-light)', textAlign: 'center', marginTop: 4 }}>
+              ยังไม่ได้ตั้งพิกัด — กดปุ่มด้านบนเพื่อใช้ GPS
+            </div>
           )}
         </div>
         <div style={{ marginBottom: 16 }}>

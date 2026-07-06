@@ -98,6 +98,9 @@ export default function ProfilePage() {
           <Link href="/profile/profession">
             <div className="menu-item"><span style={{ fontSize: 20 }}>💼</span><span style={{ fontSize: 14, fontWeight: 600 }}>อาชีพ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
           </Link>
+          <Link href="/profile/edit">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>📍</span><span style={{ fontSize: 14, fontWeight: 600 }}>พื้นที่ให้บริการ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          </Link>
           <Link href="/profile/portfolio">
             <div className="menu-item"><span style={{ fontSize: 20 }}>🖼️</span><span style={{ fontSize: 14, fontWeight: 600 }}>ผลงาน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
           </Link>
