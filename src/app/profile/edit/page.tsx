@@ -32,12 +32,10 @@ export default function EditProfilePage() {
     longitude: '',
     serviceRadius: 0,
     certifications: [] as { name: string; issuer: string; year?: number; fileUrl?: string }[],
-    tradeTypes: [] as string[],
   })
 
   const DEFAULT_TRADES = ['ช่างยนต์', 'ช่างไฟฟ้า', 'ช่างประปา', 'ช่างแอร์', 'ช่างคอมพิวเตอร์', 'ช่างก่อสร้าง', 'ช่างเฟอร์นิเจอร์', 'ช่างสี', 'ช่างกล้อง', 'ช่างอื่นๆ']
   const [systemCategories, setSystemCategories] = useState<string[]>([])
-  const [showTradeEditor, setShowTradeEditor] = useState(false)
 
 
 
@@ -140,8 +138,7 @@ const handleSave = async () => {
       const techRes = await techniciansApi.updateProfile({
         headline: form.headline,
         bio: form.bio,
-        specializations: form.tradeTypes.length > 0 ? form.tradeTypes.join(', ') : form.specializations,
-        yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : undefined,
+          yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : undefined,
         hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : undefined,
         isAvailable: form.isAvailable,
         latitude: form.latitude,
@@ -256,139 +253,7 @@ const handleSave = async () => {
             style={{ resize: 'vertical' }} />
         </div>
 
-        {/* TRADE TYPES */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>🔧 ประเภทช่าง</div>
-            <button type="button" onClick={() => setShowTradeEditor(s => !s)}
-              style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-              {showTradeEditor ? 'เสร็จ' : 'แก้ไข'}
-            </button>
-          </div>
-          {showTradeEditor ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {allTradeOptions.map(name => {
-                const selected = form.tradeTypes.includes(name)
-                return (
-                  <button type="button" key={name}
-                    onClick={() => toggleTrade(name)}
-                    style={{
-                      padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                      border: selected ? '2px solid var(--primary)' : '1.5px solid var(--border)',
-                      background: selected ? 'var(--primary-light)' : 'var(--bg)',
-                      color: selected ? '#8B6914' : 'var(--text)', cursor: 'pointer',
-                    }}>
-                    {selected ? '✓ ' : ''}{name}
-                  </button>
-                )
-              })}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {form.tradeTypes.length === 0 ? (
-                <span style={{ fontSize: 12, color: 'var(--text-light)' }}>ยังไม่ได้เลือก</span>
-              ) : form.tradeTypes.map(t => (
-                <span key={t} style={{ background: 'var(--primary-light)', color: '#8B6914', borderRadius: 20, padding: '4px 10px', fontSize: 12, fontWeight: 600 }}>{t}</span>
-              ))}
-            </div>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>ประสบการณ์ (ปี)</div>
-            <input className="form-input" type="number" min="0" value={form.yearsExperience}
-              onChange={e => set('yearsExperience', e.target.value)} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>ค่าแรง/ชม. (บาท)</div>
-            <input className="form-input" type="number" min="0" value={form.hourlyRate}
-              onChange={e => set('hourlyRate', e.target.value)} />
-          </div>
-        </div>
 
-        {/* Location */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>📍 พิกัดที่ตั้ง (สำหรับจับคู่ลูกค้าใกล้ช่าง)</div>
-          <button
-            type="button"
-            onClick={handleGetLocation}
-            disabled={locating}
-            style={{
-              width: '100%', padding: '13px', borderRadius: 14,
-              border: '2px solid var(--primary)',
-              background: locating ? 'var(--primary-light)' : 'linear-gradient(135deg, #FFF0B3 0%, #FFF8E7 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              fontSize: 15, fontWeight: 700, color: '#8B6914',
-              cursor: locating ? 'not-allowed' : 'pointer',
-              boxShadow: '0 3px 12px rgba(255,184,0,0.2)', marginBottom: 8,
-            }}
-          >
-            {locating ? (
-              <>🧭 กำลังระบุตำแหน่ง...</>
-            ) : form.latitude && form.longitude ? (
-              <>🔄 อัปเดตตำแหน่งจาก GPS</>
-            ) : (
-              <>📍 ปักหมุดที่อยู่ปัจจุบัน (GPS)</>
-            )}
-          </button>
-          {locError && (
-            <div style={{ fontSize: 12, color: '#DC2626', marginTop: 4, textAlign: 'center' }}>{locError}</div>
-          )}
-          {/* Map preview */}
-          {form.latitude && form.longitude ? (
-            <div style={{ marginTop: 8 }}>
-              <div style={{ borderRadius: 14, overflow: 'hidden', height: 150, border: '1.5px solid var(--border)', position: 'relative' }}>
-                <iframe
-                  title="map"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, position: 'absolute', top: 0, left: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(form.longitude) - 0.005},${Number(form.latitude) - 0.003},${Number(form.longitude) + 0.005},${Number(form.latitude) + 0.003}&layer=mapnik&marker=${form.latitude},${form.longitude}`}
-                />
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 5, textAlign: 'right' }}>
-                📍 {Number(form.latitude).toFixed(6)}, {Number(form.longitude).toFixed(6)}
-              </div>
-              <button type="button" onClick={() => set({ latitude: '', longitude: '' })}
-                style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 11, cursor: 'pointer', marginTop: 4 }}>
-                ล้างพิกัด
-              </button>
-            </div>
-          ) : (
-            <div style={{ fontSize: 11, color: 'var(--text-light)', textAlign: 'center', marginTop: 4 }}>
-              ยังไม่ได้ตั้งพิกัด — กดปุ่มด้านบนเพื่อใช้ GPS
-            </div>
-          )}
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>🌐 รัศมีรับงาน</div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {[{ km: 3, label: '3 กม.' }, { km: 5, label: '5 กม.' }, { km: 10, label: '10 กม.' }, { km: 20, label: '20 กม.' }, { km: 50, label: '50 กม.' }, { km: 0, label: 'ทั่วประเทศ' }].map(opt => (
-              <button
-                key={opt.km}
-                type="button"
-                onClick={() => set('serviceRadius', opt.km)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  border: form.serviceRadius === opt.km ? '2px solid var(--primary)' : '1.5px solid var(--border)',
-                  background: form.serviceRadius === opt.km ? 'var(--primary-light)' : 'white',
-                  fontSize: 12, fontWeight: 700,
-                  color: form.serviceRadius === opt.km ? '#92400E' : 'var(--text)',
-                  cursor: 'pointer',
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 6 }}>
-            💡 เลือกระยะทางสูงสุดที่คุณสามารถเดินทางไปรับงานได้
-          </div>
-        </div>
 <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ width: '100%' }}>
           {saving ? 'กำลังบันทึก...' : '💾 บันทึก'}
         </button>
