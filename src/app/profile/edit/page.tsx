@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { authApi, techniciansApi, uploadApi, categoriesApi } from '@/lib/api'
+import BackButton from '@/components/BackButton'
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -163,7 +164,7 @@ const handleSave = async () => {
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 100 }}>
       {/* HEADER */}
       <div style={{ background: 'var(--primary)', padding: '16px 20px', borderRadius: '0 0 24px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link href="/profile"><div style={{ fontSize: 20 }}>←</div></Link>
+        <BackButton href="/profile" />
         <div style={{ fontSize: 18, fontWeight: 700, color: '#3D2C00' }}>แก้ไขโปรไฟล์</div>
       </div>
 

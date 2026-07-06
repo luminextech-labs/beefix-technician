@@ -201,8 +201,8 @@ export default function TechnicianRegisterPage() {
                 </div>
               )}
               <button type="button" onClick={() => setStep(1)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-light)', fontSize: 13, cursor: 'pointer', marginBottom: 12 }}>
-                ← กลับไปแก้ไขข้อมูล
+                style={{ background: 'none', border: 'none', color: 'var(--text-light)', fontSize: 13, cursor: 'pointer', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <BackButton /> กลับไปแก้ไขข้อมูล
               </button>
             </>
           )}

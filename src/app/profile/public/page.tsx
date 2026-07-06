@@ -3,6 +3,7 @@ import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { techniciansApi } from '@/lib/api'
+import BackButton from '@/components/BackButton'
 
 function PublicProfileInner() {
   const searchParams = useSearchParams()
@@ -60,7 +61,7 @@ function PublicProfileInner() {
       {/* ===================== BLOCK 1: PROFILE HEADER ===================== */}
       <div style={{ background: 'var(--primary)', padding: '16px 20px 60px', borderRadius: '0 0 24px 24px', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 12 }}>
-          <Link href="/profile" style={{ color: '#3D2C00', fontSize: 20 }}>← กลับ</Link>
+          <BackButton href="/profile" />
         </div>
         <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--primary-dark)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, overflow: 'hidden', border: '3px solid rgba(255,255,255,0.5)' }}>
           {user?.avatarUrl ? (

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ordersApi, chatApi } from '@/lib/api'
+import BackButton from '@/components/BackButton'
 import RevisionModal from '@/components/RevisionModal'
 import DisputeModal from '@/components/DisputeModal'
 
@@ -54,7 +55,7 @@ export default function OrderDetailPage() {
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 100 }}>
       {/* HEADER */}
       <div style={{ background: 'var(--primary)', padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'center', borderRadius: '0 0 24px 24px' }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#3D2C00' }}>←</button>
+        <BackButton onClick={() => router.back()} />
         <div style={{ fontSize: 16, fontWeight: 700, color: '#3D2C00', flex: 1 }}>{order.orderNo}</div>
         <span className={`badge-${order.status}`}>{STATUS_LABELS[order.status] || order.status}</span>
       </div>

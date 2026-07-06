@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { chatApi, uploadApi } from '@/lib/api'
+import BackButton from '@/components/BackButton'
 
 export default function ChatRoomPage() {
   const params = useParams()
@@ -73,7 +74,7 @@ export default function ChatRoomPage() {
     <div style={{ background: 'var(--bg)', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* HEADER */}
       <div style={{ background: 'var(--primary)', padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, borderRadius: '0 0 24px 24px' }}>
-        <button onClick={() => router.push('/chat')} style={{ background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: '#3D2C00' }}>←</button>
+        <BackButton href="/chat" />
         <div style={{ flex: 1, fontSize: 16, fontWeight: 700, color: '#3D2C00' }}>{otherName}</div>
       </div>
 

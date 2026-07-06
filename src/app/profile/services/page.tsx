@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { servicesApi, techniciansApi, uploadApi, categoriesApi } from '@/lib/api'
+import BackButton from '@/components/BackButton'
 
 const customCatApi = {
   create: (data: { name: string; icon: string }) =>
@@ -210,7 +211,7 @@ export default function MyServicesPage() {
 
       {/* HEADER */}
       <div style={{ background: 'var(--primary)', padding: '16px 20px', borderRadius: '0 0 24px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link href="/profile"><div style={{ fontSize: 20 }}>←</div></Link>
+        <BackButton href="/profile" />
         <div style={{ fontSize: 18, fontWeight: 700, color: '#3D2C00' }}>บริการของฉัน</div>
       </div>
 

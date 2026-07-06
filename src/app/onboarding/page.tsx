@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { techniciansApi, categoriesApi, uploadApi } from '@/lib/api'
+import BackButton from '@/components/BackButton'
 
 export default function TechnicianOnboardingPage() {
   const router = useRouter()
@@ -324,8 +324,8 @@ export default function TechnicianOnboardingPage() {
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setStep(1)}
-                style={{ flex: 1, padding: 12, borderRadius: 25, border: '1.5px solid var(--border)', background: 'white', fontWeight: 700, fontSize: 14, cursor: 'pointer', color: 'var(--text)' }}>
-                ← กลับ
+                style={{ flex: 1, padding: 12, borderRadius: 25, border: '1.5px solid var(--border)', background: 'white', fontWeight: 700, fontSize: 14, cursor: 'pointer', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <BackButton />
               </button>
               <button className="btn-primary" style={{ flex: 2 }}
                 disabled={loading} onClick={handleSubmit}>

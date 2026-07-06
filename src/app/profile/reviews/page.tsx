@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { reviewsApi, techniciansApi } from '@/lib/api'
+import BackButton from '@/components/BackButton'
 
 interface Review {
   id: string
@@ -73,7 +74,7 @@ export default function ReviewsPage() {
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 100 }}>
       {/* HEADER */}
       <div style={{ background: 'var(--primary)', padding: '16px 20px', borderRadius: '0 0 24px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link href="/profile"><div style={{ fontSize: 20 }}>←</div></Link>
+        <BackButton href="/profile" />
         <div style={{ fontSize: 18, fontWeight: 700, color: '#3D2C00' }}>ดูรีวิว</div>
       </div>
 
