@@ -83,6 +83,9 @@ export default function LoginPage() {
           ยังไม่มีบัญชี?{' '}
           <a href="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>สมัครสมาชิก</a>
         </p>
+        <p style={{ textAlign: 'center', marginTop: 12, fontSize: 13 }}>
+          <a href="/forgot-password" style={{ color: 'var(--text-light)', fontWeight: 600 }}>ลืมรหัสผ่าน?</a>
+        </p>
       </div>
     </div>
   )
