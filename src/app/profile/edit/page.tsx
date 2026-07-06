@@ -25,6 +25,9 @@ export default function EditProfilePage() {
     yearsExperience: '',
     hourlyRate: '',
     isAvailable: true,
+    latitude: '',
+    longitude: '',
+    serviceRadius: 0,
     certifications: [] as { name: string; issuer: string; year?: number; fileUrl?: string }[],
     tradeTypes: [] as string[],
   })
@@ -41,7 +44,7 @@ export default function EditProfilePage() {
     if (!token) { router.replace('/login'); return }
 
     Promise.all([authApi.me(), techniciansApi.me(), categoriesApi.getAll()])
-      .then(([meRes, techRes]) => {
+      .then(([meRes, techRes, catRes]) => {
         if (!meRes.success) { router.replace('/login'); return }
         setUser(meRes.user)
         if (techRes.success) setTech(techRes.technician)
@@ -61,6 +64,9 @@ export default function EditProfilePage() {
           yearsExperience: techRes.technician?.yearsExperience?.toString() || '',
           hourlyRate: techRes.technician?.hourlyRate?.toString() || '',
           isAvailable: techRes.technician?.isAvailable ?? true,
+          latitude: techRes.technician?.latitude ? String(techRes.technician.latitude) : '',
+          longitude: techRes.technician?.longitude ? String(techRes.technician.longitude) : '',
+          serviceRadius: techRes.technician?.serviceRadius ?? 0,
           certifications: techRes.technician?.certifications || [],
           tradeTypes: parsedTrades,
         })
@@ -131,6 +137,9 @@ export default function EditProfilePage() {
         yearsExperience: form.yearsExperience ? parseInt(form.yearsExperience) : undefined,
         hourlyRate: form.hourlyRate ? parseFloat(form.hourlyRate) : undefined,
         isAvailable: form.isAvailable,
+        latitude: form.latitude,
+        longitude: form.longitude,
+        serviceRadius: form.serviceRadius,
         certifications: form.certifications,
       })
       if (techRes.success) {
@@ -289,6 +298,69 @@ export default function EditProfilePage() {
               onChange={e => set('hourlyRate', e.target.value)} />
           </div>
         </div>
+
+        {/* Location */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>📍 พิกัดที่ตั้ง (สำหรับจับคู่ลูกค้าใกล้ช่าง)</div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <input
+              className="form-input"
+              type="number"
+              step="any"
+              placeholder="ละติจูด เช่น 13.7563"
+              value={form.latitude}
+              onChange={e => set('latitude', e.target.value)}
+              style={{ flex: 1 }}
+            />
+            <input
+              className="form-input"
+              type="number"
+              step="any"
+              placeholder="ลองจิจูด เช่น 100.5018"
+              value={form.longitude}
+              onChange={e => set('longitude', e.target.value)}
+              style={{ flex: 1 }}
+            />
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 4 }}>
+            💡 ดูพิกัดได้จาก Google Maps — คลิกขวาที่ตำแหน่งของคุณ → ค่าพิกัด
+          </div>
+          {form.latitude && form.longitude && (
+            <button
+              type="button"
+              onClick={() => set({ latitude: '', longitude: '' })}
+              style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 11, cursor: 'pointer', marginTop: 4 }}
+            >
+              ล้างพิกัด
+            </button>
+          )}
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>🌐 รัศมีรับงาน</div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[{ km: 3, label: '3 กม.' }, { km: 5, label: '5 กม.' }, { km: 10, label: '10 กม.' }, { km: 20, label: '20 กม.' }, { km: 50, label: '50 กม.' }, { km: 0, label: 'ทั่วประเทศ' }].map(opt => (
+              <button
+                key={opt.km}
+                type="button"
+                onClick={() => set('serviceRadius', opt.km)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: 20,
+                  border: form.serviceRadius === opt.km ? '2px solid var(--primary)' : '1.5px solid var(--border)',
+                  background: form.serviceRadius === opt.km ? 'var(--primary-light)' : 'white',
+                  fontSize: 12, fontWeight: 700,
+                  color: form.serviceRadius === opt.km ? '#92400E' : 'var(--text)',
+                  cursor: 'pointer',
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-light)', marginTop: 6 }}>
+            💡 เลือกระยะทางสูงสุดที่คุณสามารถเดินทางไปรับงานได้
+          </div>
+        </div>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>📜 ใบรับรอง / ประกาศนียบัตร</div>
           <input
@@ -374,28 +446,7 @@ export default function EditProfilePage() {
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--card)', borderRadius: 12, marginBottom: 20 }}>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 600 }}>พร้อมรับงาน</div>
-            <div style={{ fontSize: 12, color: 'var(--text-light)' }}>เปิดรับงานจากลูกค้า</div>
-          </div>
-          <button
-            onClick={() => set('isAvailable', !form.isAvailable)}
-            style={{
-              width: 48, height: 28, borderRadius: 14, border: 'none',
-              background: form.isAvailable ? 'var(--green)' : 'var(--border)',
-              position: 'relative', cursor: 'pointer', transition: 'background 0.2s'
-            }}>
-            <div style={{
-              width: 22, height: 22, borderRadius: '50%', background: '#fff',
-              position: 'absolute', top: 3,
-              left: form.isAvailable ? 23 : 3,
-              transition: 'left 0.2s',
-            }} />
-          </button>
-        </div>
-
-        <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ width: '100%' }}>
+<button className="btn-primary" onClick={handleSave} disabled={saving} style={{ width: '100%' }}>
           {saving ? 'กำลังบันทึก...' : '💾 บันทึก'}
         </button>
       </div>
