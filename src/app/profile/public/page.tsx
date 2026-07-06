@@ -198,8 +198,9 @@ function PublicProfileInner() {
                 <div style={{ fontSize: 13, fontWeight: 600 }}>🏅 {cert.name}</div>
                 {cert.issuer && <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>{cert.issuer}{cert.year ? ` · ปี ${cert.year}` : ''}</div>}
                 {cert.fileUrl && (
-                  <a href={cert.fileUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, marginTop: 4, display: 'inline-block' }}>
-                    📎 ดูไฟล์แนบ
+                  <a href={cert.fileUrl} target="_blank" rel="noreferrer">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={cert.fileUrl} alt={cert.name} style={{ marginTop: 8, width: '100%', maxWidth: 300, borderRadius: 8, border: '1px solid var(--border)', display: 'block' }} />
                   </a>
                 )}
               </div>
