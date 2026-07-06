@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { Suspense } from 'react'
+import TokenHandler from '@/components/TokenHandler'
 
 export const metadata: Metadata = {
   title: 'Beefix Technician',
@@ -9,7 +11,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th">
-      <body>{children}</body>
+      <body>
+        <Suspense>{children}</Suspense>
+        <TokenHandler />
+      </body>
     </html>
   )
 }

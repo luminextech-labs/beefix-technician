@@ -83,6 +83,24 @@ export const ordersApi = {
     api.patch<{ success: boolean; order: any }>(`/api/orders/${id}`, { status }),
 }
 
+// Revisions (technician side)
+export const revisionsApi = {
+  create: (orderId: string, data: {
+    title?: string; description?: string; jobDate?: string; jobTime?: string;
+    laborCost?: number; travelCost?: number; materialCost?: number;
+  }) => api.post<{ success: boolean; revision: any }>(`/api/orders/${orderId}/revision`, data),
+  approve: (orderId: string, revId: string) =>
+    api.patch<{ success: boolean }>(`/api/orders/${orderId}/revision/${revId}`, { action: 'approve' }),
+  reject: (orderId: string, revId: string) =>
+    api.patch<{ success: boolean }>(`/api/orders/${orderId}/revision/${revId}`, { action: 'reject' }),
+}
+
+// Disputes (technician side)
+export const disputesApi = {
+  open: (orderId: string, data: { reason: string; description?: string }) =>
+    api.post<{ success: boolean; dispute: any }>(`/api/orders/${orderId}/dispute`, data),
+}
+
 // Wallet
 export const walletApi = {
   get: () => api.get<{ success: boolean; wallet: any; transactions: any[] }>('/api/wallets'),
@@ -124,18 +142,31 @@ export const servicesApi = {
 export const reviewsApi = {
   getByTechnician: (technicianId: string) =>
     api.get<{ success: boolean; reviews: any[]; pagination: any }>(`/api/reviews?technicianId=${technicianId}`),
+  replyToReview: (reviewId: string, reply: string) =>
+    api.patch<{ success: boolean; review: any }>(`/api/reviews/${reviewId}`, { reply }),
 }
 
 // Categories (public, no auth needed)
 export const categoriesApi = {
-  getAll: () => api.get<{ success: boolean; categories: any[] }>('/api/categories'),
+  getAll: () => fetch('https://beefix-web.vercel.app/api/public/categories', { cache: 'no-store' }).then(r => r.json()),
 }
 
 // Upload
+export const uploadApi = {
   image: (file: File, folder = 'avatars') => {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('folder', folder)
     return api.upload<{ success: boolean; url: string }>('/api/upload', formData)
   },
+}
+
+// Portfolio
+export const portfolioApi = {
+  getByTechnician: (technicianId: string) =>
+    api.get<{ success: boolean; items: any[]; pagination: any }>(`/api/portfolio?technicianId=${technicianId}`),
+  create: (data: { images: string[]; caption?: string }) =>
+    api.post<{ success: boolean; item: any }>('/api/portfolio', data),
+  delete: (itemId: string) =>
+    api.delete<{ success: boolean }>(`/api/portfolio?id=${itemId}`),
 }

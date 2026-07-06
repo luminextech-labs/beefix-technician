@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ordersApi, chatApi } from '@/lib/api'
+import RevisionModal from '@/components/RevisionModal'
+import DisputeModal from '@/components/DisputeModal'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'รอยืนยัน',
@@ -18,6 +20,8 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [showRevisionModal, setShowRevisionModal] = useState(false)
+  const [showDisputeModal, setShowDisputeModal] = useState(false)
 
   const load = () => {
     ordersApi.getOne(params.id as string).then(r => {
@@ -130,6 +134,81 @@ export default function OrderDetailPage() {
             💬 แชทกับลูกค้า
           </button>
         </Link>
+
+        {/* Revision & Dispute */}
+        {!['completed', 'cancelled'].includes(order.status) && (
+          <button className="btn-secondary" style={{ marginTop: 8, color: 'var(--primary)', borderColor: 'var(--primary)' }}
+            onClick={() => setShowRevisionModal(true)}>
+            📝 ขอแก้ไขงาน
+          </button>
+        )}
+        {['in_progress', 'completed'].includes(order.status) && !order.disputes?.some((d: any) => d.status === 'open') && (
+          <button style={{ marginTop: 8, width: '100%', padding: 10, borderRadius: 10, border: '1px solid #DC2626', background: '#FEF2F2', color: '#DC2626', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+            onClick={() => setShowDisputeModal(true)}>
+            ⚖️ เปิดข้อพิพาท
+          </button>
+        )}
+
+        {/* Open dispute alert */}
+        {order.disputes?.some((d: any) => d.status === 'open') && (
+          <div style={{ marginTop: 12, padding: 12, background: '#FEF2F2', borderRadius: 12, border: '1px solid #FECACA' }}>
+            <div style={{ fontWeight: 700, color: '#DC2626', fontSize: 13, marginBottom: 4 }}>⚖️ มีข้อพิพาทที่เปิดอยู่</div>
+            {order.disputes.filter((d: any) => d.status === 'open').map((d: any) => (
+              <div key={d.id} style={{ fontSize: 12, color: '#7F1D1D' }}>• {d.reason}</div>
+            ))}
+          </div>
+        )}
+
+        {/* Revision history */}
+        {order.revisions?.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--text)' }}>📝 ประวัติการแก้ไขงาน</div>
+            {order.revisions.map((rev: any) => (
+              <div key={rev.id} style={{ padding: 12, borderRadius: 12, marginBottom: 8, background: rev.status === 'approved' ? '#D1FAE5' : rev.status === 'rejected' ? '#FEE2E2' : '#F3F4F6', border: `1px solid ${rev.status === 'approved' ? '#A7F3D0' : rev.status === 'rejected' ? '#FECACA' : '#E5E7EB'}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600 }}>{rev.requestedBy === order.customerId ? order.customer?.fullName : 'ช่าง'}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: rev.status === 'approved' ? '#D1FAE5' : rev.status === 'rejected' ? '#FEE2E2' : '#FEF3C7', color: rev.status === 'approved' ? '#059669' : rev.status === 'rejected' ? '#DC2626' : '#D97706' }}>
+                    {rev.status === 'approved' ? '✅ อนุมัติ' : rev.status === 'rejected' ? '❌ ปฏิเสธ' : '⏳ รอ' }
+                  </span>
+                </div>
+                {rev.title && <div style={{ fontSize: 12, color: '#374151' }}>ชื่องาน: {rev.title}</div>}
+                {rev.note && <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2, fontStyle: 'italic' }}>หมายเหตุ: {rev.note}</div>}
+
+                {/* Approve/Reject for pending revisions from customer */}
+                {rev.status === 'pending' && rev.requestedBy === order.customerId && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <button
+                      onClick={async () => {
+                        const { revisionsApi } = await import('@/lib/api')
+                        await revisionsApi.approve(params.id as string, rev.id)
+                        load()
+                      }}
+                      style={{ flex: 1, padding: '6px', borderRadius: 8, border: 'none', background: '#22C55E', color: 'white', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                    >✅ อนุมัติ</button>
+                    <button
+                      onClick={async () => {
+                        const { revisionsApi } = await import('@/lib/api')
+                        await revisionsApi.reject(params.id as string, rev.id)
+                        load()
+                      }}
+                      style={{ flex: 1, padding: '6px', borderRadius: 8, border: '1px solid #DC2626', background: 'white', color: '#DC2626', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                    >❌ ปฏิเสธ</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Revision Modal */}
+      {showRevisionModal && (
+        <RevisionModal orderId={params.id as string} currentOrder={order} onClose={() => setShowRevisionModal(false)} onSuccess={() => { setShowRevisionModal(false); load() }} />
+      )}
+
+      {/* Dispute Modal */}
+      {showDisputeModal && (
+        <DisputeModal orderId={params.id as string} onClose={() => setShowDisputeModal(false)} onSuccess={() => { setShowDisputeModal(false); load() }} />
+      )}
       </div>
     </div>
   )

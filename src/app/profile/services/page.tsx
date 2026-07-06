@@ -3,6 +3,15 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { servicesApi, techniciansApi, uploadApi, categoriesApi } from '@/lib/api'
 
+const customCatApi = {
+  create: (data: { name: string; icon: string }) =>
+    fetch('/api/technicians/me/custom-categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', authorization: `Bearer ${localStorage.getItem('tech_token')}` },
+      body: JSON.stringify(data),
+    }).then(r => r.json()),
+}
+
 interface Service {
   id: string
   description: string | null
@@ -19,6 +28,55 @@ interface SystemCategory {
   subCategories: { id: string; name: string; categoryId: string }[]
 }
 
+const FALLBACK_CATEGORIES: SystemCategory[] = [
+  { id: 'f02172f7-38ac-462e-9320-ab9e48745ccb', name: 'ไฟฟ้า', icon: '⚡', subCategories: [
+    { id: 'be87c556-c2b8-474a-9f06-5111b9a29315', name: 'ติดตั้งไฟฟ้า', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
+    { id: '89a7d8fc-fd20-4867-8215-e95fb5cdc67f', name: 'ซ่อมไฟฟ้า', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
+    { id: '481cf7e7-8d87-4096-920f-b8ffd5fa888a', name: 'เดินสายไฟ', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
+    { id: '03cc2398-93fe-4dd5-a541-faf1e54af222', name: 'ติดเบรกเกอร์', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
+    { id: '6207fa51-0980-4574-bbab-406513dff96d', name: 'อัปเกรดมิเตอร์', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
+  ]},
+  { id: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5', name: 'ก่อสร้าง', icon: '🏗️', subCategories: [
+    { id: 'f3d20ffe-25c0-4eb5-bc5a-1f077b437f61', name: 'สร้างบ้าน', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
+    { id: '033a33fd-fb34-4bb8-b15f-04e8dfee53bb', name: 'ต่อเติม', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
+    { id: 'cf2fe5c7-99b6-4a0a-854b-e3544a6e7e22', name: 'ฉาบปูน', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
+    { id: 'b86119ee-37fe-4639-9d60-4a0a-854b-e3544a6e7e22', name: 'ทาสี', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
+    { id: '4b55c641-9374-4fef-91cd-04d10038ac9b', name: 'ปูกระเบื้อง', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
+    { id: 'efc21e9c-733a-4b74-9906-6bdef4770de8', name: 'ทำฝ้าเพดาน', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
+  ]},
+  { id: '18d668b9-bc30-4651-bf13-c7877c500845', name: 'ยานยนต์', icon: '🚗', subCategories: [
+    { id: '2188dc77-dbd2-479a-9ba8-e0ae150b4bcc', name: 'เปลี่ยนถ่ายน้ำมัน', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
+    { id: 'ddfa2198-9e83-4c03-b34e-6dfa9adff65c', name: 'เปลี่ยนยาง', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
+    { id: '2f503b55-7ad2-423d-98d8-bbd454569467', name: 'เบรก', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
+    { id: '1c00fcd2-2e5e-434d-b47a-5acca384df66', name: 'ไฟ', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
+    { id: '4e092cce-5f1e-4f7c-9b1a-371fc330d676', name: 'แอร์รถยนต์', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
+  ]},
+  { id: '8912298e-3dc0-464b-92d3-3a426c51a67d', name: 'ประปา', icon: '🚿', subCategories: [
+    { id: 'b83c20ee-3fb8-4d9a-b9b7-76b131b977a8', name: 'ซ่อมประปา', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
+    { id: '884562d0-7d76-4745-b01d-1849bb88e31b', name: 'ติดตั้งสุขภัณฑ์', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
+    { id: '867dcac1-c724-47d5-a408-6c287f564751', name: 'เปลี่ยนก็อก', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
+    { id: '62fbe888-f6c4-465a-b881-5f18127ce8c2', name: 'ดักน้ำทิ้ง', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
+    { id: 'd116a9ab-d1c6-4bdd-a473-464a0a70a8ce', name: 'ติดตั้งปั๊มน้ำ', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
+  ]},
+  { id: 'a52453b1-8f77-49fd-a369-5bfcababccee', name: 'เฟอร์นิเจอร์', icon: '🪑', subCategories: [
+    { id: 'c522869b-a542-47fa-962b-7f56d57211c0', name: 'ประกอบเฟอร์นิเจอร์', categoryId: 'a52453b1-8f77-49fd-a369-5bfcababccee' },
+    { id: '8e7c93c7-3fb9-49d0-a8a6-3298f9208472', name: 'ซ่อมตู้', categoryId: 'a52453b1-8f77-49fd-a369-5bfcababccee' },
+    { id: '9fcb9d5c-b77f-47db-aebc-6e2982b39266', name: 'เคลือบไม้', categoryId: 'a52453b1-8f77-49fd-a369-5bfcababccee' },
+  ]},
+  { id: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5', name: 'เครื่องใช้ไฟฟ้า', icon: '🔌', subCategories: [
+    { id: '15d04be7-7088-4a0e-af6b-ffca0a1be767', name: 'ซ่อมเครื่องปรับอากาศ', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
+    { id: 'b6587ef7-dbb0-46da-9f14-af787dcab7c6', name: 'ซ่อมตู้เย็น', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
+    { id: '0fb94082-38d0-4e96-a8bf-6464ec783c98', name: 'ซ่อมเครื่องซักผ้า', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
+    { id: '266c0a55-1b43-4b7f-ae8b-77c43772daa0', name: 'ซ่อมทีวี', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
+  ]},
+  { id: '377d485c-a3a4-4ef3-af5d-ccf020ae932c', name: 'สวน/ภูมิทัศน์', icon: '🌿', subCategories: [
+    { id: '969623b3-3501-46d9-8608-01287fafcee7', name: 'จัดสวน', categoryId: '377d485c-a3a4-4ef3-af5d-ccf020ae932c' },
+    { id: '6ae902ca-de9a-44d7-9f20-beda7c8c6fb3', name: 'ดูแลต้นไม้', categoryId: '377d485c-a3a4-4ef3-af5d-ccf020ae932c' },
+    { id: 'c85402c5-333c-47ea-8111-fa48eb23101e', name: 'ตัดหญ้า', categoryId: '377d485c-a3a4-4ef3-af5d-ccf020ae932c' },
+    { id: '3f41bb58-f8bb-4fcf-81db-c43855706362', name: 'ทำรั้ว', categoryId: '377d485c-a3a4-4ef3-af5d-ccf020ae932c' },
+  ]},
+]
+
 export default function MyServicesPage() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,7 +86,7 @@ export default function MyServicesPage() {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [viewingImages, setViewingImages] = useState<string[] | null>(null)
   const [customCategories, setCustomCategories] = useState<{ id: string; name: string; icon: string }[]>([])
-  const [systemCategories, setSystemCategories] = useState<SystemCategory[]>([])
+  const [systemCategories, setSystemCategories] = useState<SystemCategory[]>(FALLBACK_CATEGORIES)
   const [selectedSystemCat, setSelectedSystemCat] = useState<string | null>(null)
 
   const [addForm, setAddForm] = useState({
@@ -49,13 +107,16 @@ export default function MyServicesPage() {
     if (!token) return
 
     Promise.all([
-      servicesApi.getAll(),
-      techniciansApi.me(),
-      categoriesApi.getAll(),
+      servicesApi.getAll().catch(() => ({ success: false, services: [] })),
+      techniciansApi.me().catch(() => ({ success: false, technician: null })),
+      fetch('https://beefix-web.vercel.app/api/public/categories').then(r => r.json()).catch(() => ({ success: false, categories: [] })),
     ]).then(([svcRes, techRes, catRes]) => {
-      if (svcRes.success) setServices(svcRes.services)
+      if (svcRes.success) setServices(svcRes.services || [])
       if (techRes.success) setCustomCategories(techRes.technician?.customCategories || [])
-      if (catRes.success) setSystemCategories(catRes.categories || [])
+      if (catRes.success && catRes.categories?.length > 0) {
+        setSystemCategories(catRes.categories)
+      }
+      // else: keep FALLBACK_CATEGORIES
     }).finally(() => setLoading(false))
   }, [])
 
@@ -86,18 +147,19 @@ export default function MyServicesPage() {
       let payload: any = {
         description: addForm.description || undefined,
         basePrice: addForm.basePrice ? parseFloat(addForm.basePrice) : undefined,
-        images: addForm.images.filter(Boolean),
       }
 
       if (addForm.mode === 'system') {
         payload.subCategoryId = addForm.systemSubCategoryId
       } else {
-        // custom category: either existing or new
         if (addForm.customCategoryId) {
-          const cat = customCategories.find(c => c.id === addForm.customCategoryId)
-          payload.customCategory = { name: cat?.name || '', icon: cat?.icon || '🔧' }
+          payload.customCategoryId = addForm.customCategoryId
         } else {
-          payload.customCategory = { name: addForm.customCategoryName.trim(), icon: addForm.customCategoryIcon }
+          // Create new custom category first, then use its ID
+          const catRes = await customCatApi.create({ name: addForm.customCategoryName.trim(), icon: addForm.customCategoryIcon })
+          if (!catRes.success) { setError(catRes.message || 'สร้างหมวดหมู่ไม่สำเร็จ'); setAdding(false); return }
+          payload.customCategoryId = catRes.category.id
+          setCustomCategories(prev => [...prev, catRes.category])
         }
       }
 

@@ -18,6 +18,15 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [techId, setTechId] = useState('')
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
+  const [replyText, setReplyText] = useState('')
+  const [replyLoading, setReplyLoading] = useState(false)
+
+  const loadReviews = () => {
+    if (!techId) return
+    reviewsApi.getByTechnician(techId)
+      .then(revRes => { if (revRes?.success) setReviews(revRes.reviews) })
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('tech_token')
@@ -36,6 +45,25 @@ export default function ReviewsPage() {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  const openReply = (reviewId: string) => {
+    setReplyingTo(reviewId)
+    setReplyText('')
+  }
+
+  const submitReply = async () => {
+    if (!replyText.trim() || !replyingTo) return
+    setReplyLoading(true)
+    try {
+      await reviewsApi.replyToReview(replyingTo, replyText.trim())
+      setReplyingTo(null)
+      loadReviews()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setReplyLoading(false)
+    }
+  }
 
   const avgRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
@@ -96,13 +124,53 @@ export default function ReviewsPage() {
                 {new Date(review.createdAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
               </div>
 
-              {review.technicianReply ? (
+              {/* Reply modal */}
+              {replyingTo === review.id ? (
+                <div style={{ background: 'var(--primary-light)', borderRadius: 10, padding: 12, marginTop: 10, border: '1.5px solid var(--primary)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#3D2C00', marginBottom: 8 }}>✉️ ตอบกลับรีวิว</div>
+                  <textarea
+                    value={replyText}
+                    onChange={e => setReplyText(e.target.value)}
+                    placeholder="ขอบคุณลูกค้าที่รีวิว..."
+                    rows={3}
+                    style={{ width: '100%', borderRadius: 8, border: '1px solid var(--border)', padding: '8px 10px', fontSize: 13, resize: 'none', fontFamily: 'inherit' }}
+                  />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <button
+                      onClick={() => setReplyingTo(null)}
+                      style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                    >ยกเลิก</button>
+                    <button
+                      onClick={submitReply}
+                      disabled={replyLoading || !replyText.trim()}
+                      style={{ flex: 1, padding: '8px', borderRadius: 8, border: 'none', background: 'var(--primary)', color: '#3D2C00', fontSize: 13, fontWeight: 700, cursor: replyLoading ? 'default' : 'pointer', opacity: replyLoading ? 0.6 : 1 }}
+                    >
+                      {replyLoading ? 'กำลัง...' : 'ส่งตอบกลับ'}
+                    </button>
+                  </div>
+                </div>
+              ) : review.technicianReply ? (
                 <div style={{ background: '#F3F4F6', padding: '10px 12px', borderRadius: 8, fontSize: 12, marginTop: 8, borderLeft: '3px solid var(--primary)' }}>
                   <div style={{ fontWeight: 600, marginBottom: 2 }}>คุณตอบกลับ:</div>
                   <div>{review.technicianReply}</div>
                 </div>
               ) : (
-                <div style={{ fontSize: 12, color: 'var(--text-light)', fontStyle: 'italic' }}>ยังไม่ได้ตอบกลับ</div>
+                <button
+                  onClick={() => openReply(review.id)}
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#3D2C00',
+                    background: 'var(--primary-light)',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '6px 14px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ✉️ ตอบกลับรีวิวนี้
+                </button>
               )}
             </div>
           ))

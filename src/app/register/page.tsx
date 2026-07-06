@@ -96,7 +96,7 @@ export default function TechnicianRegisterPage() {
 
       if (res.success) {
         authApi.setToken(res.token)
-        window.location.href = 'https://beefix-web.vercel.app/technician/onboarding'
+        window.location.href = 'https://beefix-technician-2ill72kk9-luminexlabs-projects.vercel.app/onboarding'
       } else {
         setError(res.message || 'สมัครไม่สำเร็จ ลองใหม่อีกครั้ง')
       }

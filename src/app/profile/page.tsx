@@ -90,19 +90,19 @@ export default function ProfilePage() {
             <div className="menu-item"><span style={{ fontSize: 20 }}>✏️</span><span style={{ fontSize: 14, fontWeight: 600 }}>แก้ไขโปรไฟล์</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
           </Link>
           <Link href="/profile/services">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>🔧</span><span style={{ fontSize: 14, fontWeight: 600 }}>บริการของฉัน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+            <div className="menu-item"><span style={{ fontSize: 20 }}>🛒</span><span style={{ fontSize: 14, fontWeight: 600 }}>บริการของฉัน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          </Link>
+          <Link href="/profile/certifications">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>📜</span><span style={{ fontSize: 14, fontWeight: 600 }}>ใบรับรอง</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          </Link>
+          <Link href="/profile/profession">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>💼</span><span style={{ fontSize: 14, fontWeight: 600 }}>อาชีพ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          </Link>
+          <Link href="/profile/portfolio">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>🖼️</span><span style={{ fontSize: 14, fontWeight: 600 }}>ผลงาน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
           </Link>
           <Link href="/profile/reviews">
             <div className="menu-item"><span style={{ fontSize: 20 }}>⭐</span><span style={{ fontSize: 14, fontWeight: 600 }}>ดูรีวิว</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
-          </Link>
-          <Link href="/profile/categories">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>📂</span><span style={{ fontSize: 14, fontWeight: 600 }}>หมวดหมู่ของฉัน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
-          </Link>
-          <Link href="/profile/portfolio">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>🖼️</span><span style={{ fontSize: 14, fontWeight: 600 }}>ผลงาน / Portfolio</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
-          </Link>
-          <Link href={`/profile/public?techId=${tech?.id}`} target="_blank">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>🌐</span><span style={{ fontSize: 14, fontWeight: 600 }}>ดูโปรไฟล์สาธารณะ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
           </Link>
         </div>
 

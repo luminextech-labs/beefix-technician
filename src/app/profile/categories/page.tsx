@@ -3,6 +3,22 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { techniciansApi } from '@/lib/api'
 
+// Direct API helpers for custom categories
+const customCatApi = {
+  list: () => fetch('/api/technicians/me/custom-categories').then(r => r.json()),
+  create: (data: { name: string; icon: string }) =>
+    fetch('/api/technicians/me/custom-categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', authorization: `Bearer ${localStorage.getItem('tech_token')}` },
+      body: JSON.stringify(data),
+    }).then(r => r.json()),
+  remove: (id: string) =>
+    fetch(`/api/technicians/me/custom-categories/${id}`, {
+      method: 'DELETE',
+      headers: { authorization: `Bearer ${localStorage.getItem('tech_token')}` },
+    }).then(r => r.json()),
+}
+
 interface Category {
   id: string
   name: string
@@ -21,21 +37,18 @@ export default function CategoriesPage() {
   const [form, setForm] = useState({ name: '', icon: '🔧' })
 
   useEffect(() => {
-    techniciansApi.me().then(res => {
-      if (res.success) {
-        setCategories(res.technician?.customCategories || [])
-      }
-    }).finally(() => setLoading(false))
+    customCatApi.list().then(res => {
+      if (res.success) setCategories(res.categories || [])
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   const handleSave = async () => {
     if (!form.name.trim()) { setError('กรุณากรอกชื่อหมวดหมู่'); return }
     setSaving(true); setError('')
     try {
-      const updated = [...categories, { id: Date.now().toString(), name: form.name.trim(), icon: form.icon }]
-      const res = await techniciansApi.updateProfile({ customCategories: updated })
+      const res = await customCatApi.create({ name: form.name.trim(), icon: form.icon })
       if (res.success) {
-        setCategories(res.technician?.customCategories || [])
+        setCategories(prev => [...prev, res.category])
         setShowAdd(false)
         setForm({ name: '', icon: '🔧' })
       } else {
@@ -48,8 +61,8 @@ export default function CategoriesPage() {
   const handleDelete = async (id: string) => {
     setDeleting(id)
     try {
-      const res = await techniciansApi.updateProfile({ customCategories: categories.filter(c => c.id !== id) })
-      if (res.success) setCategories(res.technician?.customCategories || [])
+      await customCatApi.remove(id)
+      setCategories(prev => prev.filter(c => c.id !== id))
     } finally { setDeleting(null) }
   }
 
