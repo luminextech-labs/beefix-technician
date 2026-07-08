@@ -115,25 +115,25 @@ export default function ServiceAreasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-3.5 flex items-center gap-3">
+        <div className="max-w-2xl mx-auto px-3 py-2.5 flex items-center gap-2">
           <BackButton />
           <div>
-            <h1 className="font-semibold text-gray-900 text-base">พื้นที่ให้บริการ</h1>
-            <p className="text-xs text-gray-400">ตั้งตำแหน่งฐานงาน</p>
+            <h1 className="font-semibold text-gray-900 text-sm">พื้นที่ให้บริการ</h1>
+            <p className="text-xs text-gray-400 hidden">ตั้งตำแหน่งฐานงาน</p>
           </div>
         </div>
       </div>
 
       {msg && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm px-4 py-2.5 rounded-xl shadow-lg">
+        <div className="fixed top-12 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg shadow">
           {msg}
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto px-4 pt-4">
+      <div className="max-w-2xl mx-auto px-3 pt-3">
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-8 h-8 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
@@ -143,28 +143,28 @@ export default function ServiceAreasPage() {
             {/* ── MAP CARD ── */}
             {baseLocation ? (
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-4">
-                <LocationMap lat={baseLocation.lat} lng={baseLocation.lng} radiusKm={serviceRadius} height={200} />
+                <LocationMap lat={baseLocation.lat} lng={baseLocation.lng} radiusKm={serviceRadius} height={150} />
               </div>
             ) : (
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-4">
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
                     <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-500 mb-1">ยังไม่ได้ปักหมุดที่อยู่</p>
+                  <p className="text-xs font-medium text-gray-500 mb-0.5">ยังไม่ได้ปักหมุดที่อยู่</p>
                   <p className="text-xs text-gray-400">กดปุ่ม GPS ด้านล่างเพื่อปักหมุด</p>
                 </div>
               </div>
             )}
 
             {/* ── GPS BUTTON ── */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-3 mb-4">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-3 py-2.5 mb-3">
               <button
                 onClick={handleGetLocation}
                 disabled={locating}
-                className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors
+                className={`w-full py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors
                   ${locating ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
                     baseLocation ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
               >
@@ -193,10 +193,10 @@ export default function ServiceAreasPage() {
             </div>
 
             {/* ── ADDRESS FORM ── */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-4 mb-4">
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">ที่อยู่ฐานงาน</h3>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-3 py-3 mb-3">
+              <h3 className="text-xs font-semibold text-gray-700 mb-2">ที่อยู่ฐานงาน</h3>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* ที่อยู่ */}
                 <div>
                   <label className="text-xs font-medium text-gray-500 mb-1 block">ที่อยู่</label>
@@ -204,20 +204,20 @@ export default function ServiceAreasPage() {
                     value={address}
                     onChange={e => setAddress(e.target.value)}
                     rows={2}
-                    placeholder="บ้านเลขที่, ซอย, ถนน, หมู่บ้าน..."
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-400 resize-none"
+                    placeholder="บ้านเลขที่, ซอย, ถนน..."
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-400 resize-none"
                   />
                 </div>
 
                 {/* ตำบล + อำเภอ */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">ตำบล</label>
                     <input
                       value={subdistrict}
                       onChange={e => setSubdistrict(e.target.value)}
                       placeholder="ตำบล"
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-400"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-400"
                     />
                   </div>
                   <div>
@@ -226,7 +226,7 @@ export default function ServiceAreasPage() {
                       value={district}
                       onChange={e => setDistrict(e.target.value)}
                       placeholder="อำเภอ"
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-400"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-800 placeholder-gray-300 focus:outline-none focus:border-blue-400"
                     />
                   </div>
                 </div>
@@ -237,7 +237,7 @@ export default function ServiceAreasPage() {
                   <select
                     value={province}
                     onChange={e => setProvince(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-800 focus:outline-none focus:border-blue-400 bg-white"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-800 focus:outline-none focus:border-blue-400 bg-white"
                   >
                     <option value="">เลือกจังหวัด</option>
                     {PROVINCES.map(p => (
@@ -249,17 +249,17 @@ export default function ServiceAreasPage() {
             </div>
 
             {/* ── RADIUS ── */}
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-3 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">รัศมีให้บริการ</span>
-                <span className="text-sm font-bold text-blue-600">{serviceRadius} กม.</span>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-3 py-2.5 mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-medium text-gray-700">รัศมีให้บริการ</span>
+                <span className="text-xs font-bold text-blue-600">{serviceRadius} กม.</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 {[5, 10, 20, 30, 50].map(r => (
                   <button
                     key={r}
                     onClick={() => setServiceRadius(r)}
-                    className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors
                       ${serviceRadius === r
                         ? 'border-blue-500 bg-blue-50 text-blue-600'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
@@ -275,12 +275,12 @@ export default function ServiceAreasPage() {
 
       {/* Sticky save */}
       {!loading && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-10">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-3 py-2.5 z-10">
           <div className="max-w-2xl mx-auto">
             <button
               onClick={handleSave}
               disabled={saving}
-              className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors
+              className={`w-full py-2.5 rounded-xl text-xs font-semibold transition-colors
                 ${saving ? 'bg-gray-300 text-white cursor-not-allowed' :
                   saved ? 'bg-emerald-500 text-white' :
                   'bg-blue-600 text-white hover:bg-blue-700'}`}
