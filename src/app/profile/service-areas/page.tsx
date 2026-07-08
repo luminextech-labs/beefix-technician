@@ -166,7 +166,7 @@ export default function ServiceAreasPage() {
                 disabled={locating}
                 className={`w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors
                   ${locating ? 'bg-gray-100 text-gray-400 cursor-not-allowed' :
-                    baseLocation ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-blue-600 text-white hover:bg-blue-700']}`}
+                    baseLocation ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
               >
                 {locating ? (
                   <>
@@ -283,7 +283,7 @@ export default function ServiceAreasPage() {
               className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors
                 ${saving ? 'bg-gray-300 text-white cursor-not-allowed' :
                   saved ? 'bg-emerald-500 text-white' :
-                  'bg-blue-600 text-white hover:bg-blue-700']}`}
+                  'bg-blue-600 text-white hover:bg-blue-700'}`}
             >
               {saving ? 'กำลังบันทึก...' : saved ? '✓ บันทึกสำเร็จ' : 'บันทึก'}
             </button>
