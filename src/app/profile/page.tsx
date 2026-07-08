@@ -87,25 +87,25 @@ export default function ProfilePage() {
         {/* MENU */}
         <div className="card-shadow" style={{ overflow: 'hidden', marginBottom: 12, borderRadius: 16 }}>
           <Link href="/profile/edit">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>✏️</span><span style={{ fontSize: 14, fontWeight: 600 }}>แก้ไขโปรไฟล์</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+            <div className="menu-item"><span style={{ fontSize: 20 }}>✏️</span><span style={{ fontSize: 14, fontWeight: 600 }}>แก้ไขโปรไฟล์</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>›</span></div>
           </Link>
           <Link href="/profile/services">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>🛒</span><span style={{ fontSize: 14, fontWeight: 600 }}>บริการของฉัน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+            <div className="menu-item"><span style={{ fontSize: 20 }}>🛒</span><span style={{ fontSize: 14, fontWeight: 600 }}>บริการของฉัน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>›</span></div>
           </Link>
           <Link href="/profile/certifications">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>📜</span><span style={{ fontSize: 14, fontWeight: 600 }}>ใบรับรอง</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+            <div className="menu-item"><span style={{ fontSize: 20 }}>📜</span><span style={{ fontSize: 14, fontWeight: 600 }}>ใบรับรอง</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>›</span></div>
           </Link>
           <Link href="/profile/profession">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>💼</span><span style={{ fontSize: 14, fontWeight: 600 }}>อาชีพ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+            <div className="menu-item"><span style={{ fontSize: 20 }}>💼</span><span style={{ fontSize: 14, fontWeight: 600 }}>อาชีพ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>›</span></div>
           </Link>
-          <Link href="/profile/edit">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>📍</span><span style={{ fontSize: 14, fontWeight: 600 }}>พื้นที่ให้บริการ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+          <Link href="/profile/service-areas">
+            <div className="menu-item"><span style={{ fontSize: 20 }}>📍</span><span style={{ fontSize: 14, fontWeight: 600 }}>พื้นที่บริการ</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>›</span></div>
           </Link>
           <Link href="/profile/portfolio">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>🖼️</span><span style={{ fontSize: 14, fontWeight: 600 }}>ผลงาน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+            <div className="menu-item"><span style={{ fontSize: 20 }}>🖼️</span><span style={{ fontSize: 14, fontWeight: 600 }}>ผลงาน</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>›</span></div>
           </Link>
           <Link href="/profile/reviews">
-            <div className="menu-item"><span style={{ fontSize: 20 }}>⭐</span><span style={{ fontSize: 14, fontWeight: 600 }}>ดูรีวิว</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>→</span></div>
+            <div className="menu-item"><span style={{ fontSize: 20 }}>⭐</span><span style={{ fontSize: 14, fontWeight: 600 }}>ดูรีวิว</span><span style={{ marginLeft: 'auto', color: 'var(--text-light)' }}>›</span></div>
           </Link>
         </div>
 
@@ -118,7 +118,7 @@ export default function ProfilePage() {
 
       <div className="bottom-nav">
         <Link href="/dashboard" className="nav-item"><span className="nav-icon">🏠</span>หน้าแรก</Link>
-        <Link href="/orders" className="nav-item"><span style={{ fontSize: 20 }}>📋</span>งาน</Link>
+        <Link href="/orders" className="nav-item"><span className="nav-icon">📋</span>งาน</Link>
         <Link href="/chat" className="nav-item"><span className="nav-icon">💬</span>แชท</Link>
         <Link href="/wallet" className="nav-item"><span className="nav-icon">💳</span>กระเป๋า</Link>
         <Link href="/profile" className="nav-item active"><span className="nav-icon">👤</span>โปรไฟล์</Link>

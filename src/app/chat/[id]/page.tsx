@@ -13,6 +13,7 @@ export default function ChatRoomPage() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const [otherName, setOtherName] = useState('')
   const [myId, setMyId] = useState<string>('')
+  const [isNearBottom, setIsNearBottom] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -43,7 +44,20 @@ export default function ChatRoomPage() {
     return () => clearInterval(i)
   }, [params.id])
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+  useEffect(() => {
+    const el = bottomRef.current?.parentElement
+    if (!el) return
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    setIsNearBottom(distFromBottom < 80)
+    if (isNearBottom) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const handleScroll = () => {
+    const el = bottomRef.current?.parentElement
+    if (!el) return
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    setIsNearBottom(distFromBottom < 80)
+  }
 
   const sendText = async () => {
     if (!input.trim() || sending) return
@@ -79,7 +93,7 @@ export default function ChatRoomPage() {
       </div>
 
       {/* MESSAGES */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }} onScroll={handleScroll}>
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', marginTop: 60, color: 'var(--text-light)', fontSize: 14 }}>
             เริ่มสนทนาได้เลย 👋

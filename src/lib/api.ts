@@ -25,7 +25,7 @@ class ApiClient {
     }
     if (token) headers['Authorization'] = `Bearer ${token}`
     // Use relative URL for /api/ paths (local proxy routes), full URL for external
-    const url = path.startsWith('/api/') ? path : `${TECH_API_URL}${path}`
+    const url = path.startsWith('/') ? `${TECH_API_URL}${path}` : path
     return fetch(url, { ...options, headers }).then(async r => {
       let data: any
       try { data = await r.json() } catch { data = {} }
@@ -44,6 +44,9 @@ class ApiClient {
   patch<T>(path: string, body?: unknown) {
     return this.request<T>(path, { method: 'PATCH', body: JSON.stringify(body) })
   }
+  put<T>(path: string, body?: unknown) {
+    return this.request<T>(path, { method: 'PUT', body: JSON.stringify(body) })
+  }
   delete<T>(path: string) {
     return this.request<T>(path, { method: 'DELETE' })
   }
@@ -51,7 +54,7 @@ class ApiClient {
     const token = this.getToken()
     const headers: Record<string, string> = {}
     if (token) headers['Authorization'] = `Bearer ${token}`
-    const url = path.startsWith('/api/') ? path : `${TECH_API_URL}${path}`
+    const url = path.startsWith('/') ? `${TECH_API_URL}${path}` : path
     return fetch(url, { method: 'POST', headers, body: formData } as any).then(async r => {
       let data: any
       try { data = await r.json() } catch { data = {} }

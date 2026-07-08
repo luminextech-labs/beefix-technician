@@ -123,9 +123,10 @@ const handleSave = async () => {
     setSaving(true)
     try {
       // Update avatar via profile API
+      const token = localStorage.getItem('tech_token') || localStorage.getItem('token') || ''
       const profileRes = await fetch('/api/profile', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ avatarUrl: form.avatarUrl, fullName: form.fullName, phone: form.phone }),
       }).then(r => r.json())
 

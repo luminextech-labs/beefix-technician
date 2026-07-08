@@ -148,7 +148,7 @@ export default function ProfessionPage() {
 
       <div className="bottom-nav">
         <Link href="/dashboard" className="nav-item"><span className="nav-icon">🏠</span>หน้าแรก</Link>
-        <Link href="/orders" className="nav-item"><span style={{ fontSize: 20 }}>📋</span>งาน</Link>
+        <Link href="/orders" className="nav-item"><span className="nav-icon">📋</span>งาน</Link>
         <Link href="/chat" className="nav-item"><span className="nav-icon">💬</span>แชท</Link>
         <Link href="/wallet" className="nav-item"><span className="nav-icon">💳</span>กระเป๋า</Link>
         <Link href="/profile" className="nav-item active"><span className="nav-icon">👤</span>โปรไฟล์</Link>

@@ -48,7 +48,13 @@ export default function PortfolioPage() {
     try {
       const res = await uploadApi.image(file, 'portfolio')
       if (res.success && res.url) {
-        setForm(f => ({ ...f, images: f.images.map((img, i) => i === slotIndex ? res.url : img) }))
+        setForm(f => {
+          const newImages = [...f.images]
+          // Ensure array has enough slots
+          while (newImages.length <= slotIndex) newImages.push('')
+          newImages[slotIndex] = res.url
+          return { ...f, images: newImages }
+        })
       }
     } finally {
       setUploadingSlots(prev => { const n = [...prev]; n[slotIndex] = false; return n })
@@ -221,7 +227,7 @@ export default function PortfolioPage() {
 
       <div className="bottom-nav">
         <Link href="/dashboard" className="nav-item"><span className="nav-icon">🏠</span>หน้าแรก</Link>
-        <Link href="/orders" className="nav-item"><span style={{ fontSize: 20 }}>📋</span>งาน</Link>
+        <Link href="/orders" className="nav-item"><span className="nav-icon">📋</span>งาน</Link>
         <Link href="/chat" className="nav-item"><span className="nav-icon">💬</span>แชท</Link>
         <Link href="/wallet" className="nav-item"><span className="nav-icon">💳</span>กระเป๋า</Link>
         <Link href="/profile" className="nav-item active"><span className="nav-icon">👤</span>โปรไฟล์</Link>

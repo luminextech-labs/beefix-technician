@@ -1,17 +1,8 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { servicesApi, techniciansApi, uploadApi, categoriesApi } from '@/lib/api'
+import { servicesApi, techniciansApi, uploadApi } from '@/lib/api'
 import BackButton from '@/components/BackButton'
-
-const customCatApi = {
-  create: (data: { name: string; icon: string }) =>
-    fetch('/api/technicians/me/custom-categories', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', authorization: `Bearer ${localStorage.getItem('tech_token')}` },
-      body: JSON.stringify(data),
-    }).then(r => r.json()),
-}
 
 interface Service {
   id: string
@@ -19,25 +10,23 @@ interface Service {
   basePrice: number | null
   images: string[]
   subCategory?: { id: string; name: string; category: { id: string; name: string } }
-  customCategory?: { name: string; icon: string }
 }
 
 interface SystemCategory {
   id: string
   name: string
-  icon: string
   subCategories: { id: string; name: string; categoryId: string }[]
 }
 
 const FALLBACK_CATEGORIES: SystemCategory[] = [
-  { id: 'f02172f7-38ac-462e-9320-ab9e48745ccb', name: 'ไฟฟ้า', icon: '⚡', subCategories: [
+  { id: 'f02172f7-38ac-462e-9320-ab9e48745ccb', name: 'ไฟฟ้า', subCategories: [
     { id: 'be87c556-c2b8-474a-9f06-5111b9a29315', name: 'ติดตั้งไฟฟ้า', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
     { id: '89a7d8fc-fd20-4867-8215-e95fb5cdc67f', name: 'ซ่อมไฟฟ้า', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
     { id: '481cf7e7-8d87-4096-920f-b8ffd5fa888a', name: 'เดินสายไฟ', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
     { id: '03cc2398-93fe-4dd5-a541-faf1e54af222', name: 'ติดเบรกเกอร์', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
     { id: '6207fa51-0980-4574-bbab-406513dff96d', name: 'อัปเกรดมิเตอร์', categoryId: 'f02172f7-38ac-462e-9320-ab9e48745ccb' },
   ]},
-  { id: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5', name: 'ก่อสร้าง', icon: '🏗️', subCategories: [
+  { id: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5', name: 'ก่อสร้าง', subCategories: [
     { id: 'f3d20ffe-25c0-4eb5-bc5a-1f077b437f61', name: 'สร้างบ้าน', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
     { id: '033a33fd-fb34-4bb8-b15f-04e8dfee53bb', name: 'ต่อเติม', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
     { id: 'cf2fe5c7-99b6-4a0a-854b-e3544a6e7e22', name: 'ฉาบปูน', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
@@ -45,32 +34,32 @@ const FALLBACK_CATEGORIES: SystemCategory[] = [
     { id: '4b55c641-9374-4fef-91cd-04d10038ac9b', name: 'ปูกระเบื้อง', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
     { id: 'efc21e9c-733a-4b74-9906-6bdef4770de8', name: 'ทำฝ้าเพดาน', categoryId: 'ab6c6cfe-bc83-409e-8f82-b8b3eb2895a5' },
   ]},
-  { id: '18d668b9-bc30-4651-bf13-c7877c500845', name: 'ยานยนต์', icon: '🚗', subCategories: [
+  { id: '18d668b9-bc30-4651-bf13-c7877c500845', name: 'ยานยนต์', subCategories: [
     { id: '2188dc77-dbd2-479a-9ba8-e0ae150b4bcc', name: 'เปลี่ยนถ่ายน้ำมัน', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
     { id: 'ddfa2198-9e83-4c03-b34e-6dfa9adff65c', name: 'เปลี่ยนยาง', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
     { id: '2f503b55-7ad2-423d-98d8-bbd454569467', name: 'เบรก', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
     { id: '1c00fcd2-2e5e-434d-b47a-5acca384df66', name: 'ไฟ', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
     { id: '4e092cce-5f1e-4f7c-9b1a-371fc330d676', name: 'แอร์รถยนต์', categoryId: '18d668b9-bc30-4651-bf13-c7877c500845' },
   ]},
-  { id: '8912298e-3dc0-464b-92d3-3a426c51a67d', name: 'ประปา', icon: '🚿', subCategories: [
+  { id: '8912298e-3dc0-464b-92d3-3a426c51a67d', name: 'ประปา', subCategories: [
     { id: 'b83c20ee-3fb8-4d9a-b9b7-76b131b977a8', name: 'ซ่อมประปา', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
     { id: '884562d0-7d76-4745-b01d-1849bb88e31b', name: 'ติดตั้งสุขภัณฑ์', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
     { id: '867dcac1-c724-47d5-a408-6c287f564751', name: 'เปลี่ยนก็อก', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
     { id: '62fbe888-f6c4-465a-b881-5f18127ce8c2', name: 'ดักน้ำทิ้ง', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
     { id: 'd116a9ab-d1c6-4bdd-a473-464a0a70a8ce', name: 'ติดตั้งปั๊มน้ำ', categoryId: '8912298e-3dc0-464b-92d3-3a426c51a67d' },
   ]},
-  { id: 'a52453b1-8f77-49fd-a369-5bfcababccee', name: 'เฟอร์นิเจอร์', icon: '🪑', subCategories: [
+  { id: 'a52453b1-8f77-49fd-a369-5bfcababccee', name: 'เฟอร์นิเจอร์', subCategories: [
     { id: 'c522869b-a542-47fa-962b-7f56d57211c0', name: 'ประกอบเฟอร์นิเจอร์', categoryId: 'a52453b1-8f77-49fd-a369-5bfcababccee' },
     { id: '8e7c93c7-3fb9-49d0-a8a6-3298f9208472', name: 'ซ่อมตู้', categoryId: 'a52453b1-8f77-49fd-a369-5bfcababccee' },
     { id: '9fcb9d5c-b77f-47db-aebc-6e2982b39266', name: 'เคลือบไม้', categoryId: 'a52453b1-8f77-49fd-a369-5bfcababccee' },
   ]},
-  { id: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5', name: 'เครื่องใช้ไฟฟ้า', icon: '🔌', subCategories: [
+  { id: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5', name: 'เครื่องใช้ไฟฟ้า', subCategories: [
     { id: '15d04be7-7088-4a0e-af6b-ffca0a1be767', name: 'ซ่อมเครื่องปรับอากาศ', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
     { id: 'b6587ef7-dbb0-46da-9f14-af787dcab7c6', name: 'ซ่อมตู้เย็น', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
     { id: '0fb94082-38d0-4e96-a8bf-6464ec783c98', name: 'ซ่อมเครื่องซักผ้า', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
     { id: '266c0a55-1b43-4b7f-ae8b-77c43772daa0', name: 'ซ่อมทีวี', categoryId: 'cb99b7b8-873c-42f6-9b1e-78f0f094f9b5' },
   ]},
-  { id: '377d485c-a3a4-4ef3-af5d-ccf020ae932c', name: 'สวน/ภูมิทัศน์', icon: '🌿', subCategories: [
+  { id: '377d485c-a3a4-4ef3-af5d-ccf020ae932c', name: 'สวน/ภูมิทัศน์', subCategories: [
     { id: '969623b3-3501-46d9-8608-01287fafcee7', name: 'จัดสวน', categoryId: '377d485c-a3a4-4ef3-af5d-ccf020ae932c' },
     { id: '6ae902ca-de9a-44d7-9f20-beda7c8c6fb3', name: 'ดูแลต้นไม้', categoryId: '377d485c-a3a4-4ef3-af5d-ccf020ae932c' },
     { id: 'c85402c5-333c-47ea-8111-fa48eb23101e', name: 'ตัดหญ้า', categoryId: '377d485c-a3a4-4ef3-af5d-ccf020ae932c' },
@@ -86,16 +75,11 @@ export default function MyServicesPage() {
   const [error, setError] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
   const [viewingImages, setViewingImages] = useState<string[] | null>(null)
-  const [customCategories, setCustomCategories] = useState<{ id: string; name: string; icon: string }[]>([])
   const [systemCategories, setSystemCategories] = useState<SystemCategory[]>(FALLBACK_CATEGORIES)
-  const [selectedSystemCat, setSelectedSystemCat] = useState<string | null>(null)
 
   const [addForm, setAddForm] = useState({
-    mode: 'custom' as 'system' | 'custom',
+    systemCatId: '',
     systemSubCategoryId: '',
-    customCategoryId: '',
-    customCategoryName: '',
-    customCategoryIcon: '🔧',
     description: '',
     basePrice: '',
     images: [] as string[],
@@ -109,15 +93,12 @@ export default function MyServicesPage() {
 
     Promise.all([
       servicesApi.getAll().catch(() => ({ success: false, services: [] })),
-      techniciansApi.me().catch(() => ({ success: false, technician: null })),
       fetch('https://beefix-web.vercel.app/api/public/categories').then(r => r.json()).catch(() => ({ success: false, categories: [] })),
-    ]).then(([svcRes, techRes, catRes]) => {
+    ]).then(([svcRes, catRes]) => {
       if (svcRes.success) setServices(svcRes.services || [])
-      if (techRes.success) setCustomCategories(techRes.technician?.customCategories || [])
       if (catRes.success && catRes.categories?.length > 0) {
         setSystemCategories(catRes.categories)
       }
-      // else: keep FALLBACK_CATEGORIES
     }).finally(() => setLoading(false))
   }, [])
 
@@ -136,39 +117,25 @@ export default function MyServicesPage() {
     }
   }
 
+  const selectedCat = systemCategories.find(c => c.id === addForm.systemCatId)
+
   const handleAdd = async () => {
-    if (addForm.mode === 'system' && !addForm.systemSubCategoryId) {
-      setError('กรุณาเลือกประเภทบริการ'); return
-    }
-    if (addForm.mode === 'custom' && !addForm.customCategoryName.trim() && !addForm.customCategoryId) {
-      setError('กรุณาเลือกหรือสร้างหมวดหมู่'); return
+    if (!addForm.systemSubCategoryId) {
+      setError('กรุณาเลือกหมวดหมู่และบริการ'); return
     }
     setAdding(true); setError('')
     try {
-      let payload: any = {
+      const payload: any = {
+        subCategoryId: addForm.systemSubCategoryId,
         description: addForm.description || undefined,
         basePrice: addForm.basePrice ? parseFloat(addForm.basePrice) : undefined,
+        images: addForm.images.filter(Boolean),
       }
-
-      if (addForm.mode === 'system') {
-        payload.subCategoryId = addForm.systemSubCategoryId
-      } else {
-        if (addForm.customCategoryId) {
-          payload.customCategoryId = addForm.customCategoryId
-        } else {
-          // Create new custom category first, then use its ID
-          const catRes = await customCatApi.create({ name: addForm.customCategoryName.trim(), icon: addForm.customCategoryIcon })
-          if (!catRes.success) { setError(catRes.message || 'สร้างหมวดหมู่ไม่สำเร็จ'); setAdding(false); return }
-          payload.customCategoryId = catRes.category.id
-          setCustomCategories(prev => [...prev, catRes.category])
-        }
-      }
-
       const res = await servicesApi.add(payload)
       if (res.success) {
         setServices(s => [...s, res.service])
         setShowAdd(false)
-        setAddForm({ mode: 'custom', systemSubCategoryId: '', customCategoryId: '', customCategoryName: '', customCategoryIcon: '🔧', description: '', basePrice: '', images: [] })
+        setAddForm({ systemCatId: '', systemSubCategoryId: '', description: '', basePrice: '', images: [] })
       } else {
         setError(res.message || 'เพิ่มไม่สำเร็จ')
       }
@@ -184,15 +151,19 @@ export default function MyServicesPage() {
     } finally { setDeleting(null) }
   }
 
-  // Group: custom category first, then system subcategories
-  const customServices = services.filter(s => s.customCategory)
-  const systemServices = services.filter(s => !s.customCategory)
-
-  const DEFAULT_ICONS = ['🔧', '⚡', '🚗', '🏠', '💻', '🎨', '🔌', '🛠️', '💡', '🚿', '🏗️', '🌿']
+  // Group services by category name
+  const grouped = [...new Map(
+    services
+      .filter(s => s.subCategory?.category?.name)
+      .map(s => [s.subCategory!.category!.name, s.subCategory!.category!.name])
+  ).keys()].map(catName => ({
+    name: catName,
+    services: services.filter(s => s.subCategory?.category?.name === catName),
+  }))
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 100 }}>
-      {/* IMAGE VIEWER MODAL */}
+      {/* IMAGE VIEWER */}
       {viewingImages && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', flexDirection: 'column' }} onClick={() => setViewingImages(null)}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 16 }}>
@@ -227,75 +198,35 @@ export default function MyServicesPage() {
             <div style={{ fontSize: 13, color: 'var(--text-light)' }}>เพิ่มบริการที่คุณให้ได้</div>
           </div>
         ) : (
-          <>
-            {/* CUSTOM CATEGORIES GROUP */}
-            {customCategories.length > 0 && customCategories.map(cat => {
-              const catServices = customServices.filter(s => s.customCategory?.name === cat.name)
-              if (catServices.length === 0) return null
-              return (
-                <div key={cat.id} style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-light)', marginBottom: 8, paddingLeft: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 16 }}>{cat.icon}</span> {cat.name}
-                  </div>
-                  {catServices.map(svc => (
-                    <div key={svc.id} className="card-shadow" style={{ padding: 14, borderRadius: 12, marginBottom: 8 }}>
-                      {svc.images?.length > 0 && (
-                        <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', paddingBottom: 4 }}>
-                          {svc.images.map((img, i) => (
-                            <div key={i} onClick={() => setViewingImages(svc.images!)} style={{ width: 64, height: 64, borderRadius: 8, overflow: 'hidden', flexShrink: 0, cursor: 'pointer' }}>
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
-                          ))}
+          grouped.map(group => (
+            <div key={group.name} style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-light)', marginBottom: 8, paddingLeft: 4 }}>{group.name}</div>
+              {group.services.map(svc => (
+                <div key={svc.id} className="card-shadow" style={{ padding: 14, borderRadius: 12, marginBottom: 8 }}>
+                  {svc.images?.length > 0 && (
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', paddingBottom: 4 }}>
+                      {svc.images.map((img, i) => (
+                        <div key={i} onClick={() => setViewingImages(svc.images!)} style={{ width: 64, height: 64, borderRadius: 8, overflow: 'hidden', flexShrink: 0, cursor: 'pointer' }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
-                      )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 700, fontSize: 14 }}>{svc.description?.split('\n')[0] || 'บริการ'}</div>
-                          {svc.description && <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>{svc.description}</div>}
-                          {svc.basePrice != null && <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>฿{svc.basePrice.toLocaleString()}</div>}
-                        </div>
-                        <button onClick={() => handleDelete(svc.id)} disabled={deleting === svc.id} style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 12, cursor: 'pointer', padding: '4px 8px' }}>
-                          {deleting === svc.id ? '...' : 'ลบ'}
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>{svc.subCategory?.name}</div>
+                      {svc.description && <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>{svc.description}</div>}
+                      {svc.basePrice != null && <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>฿{svc.basePrice.toLocaleString()}</div>}
+                    </div>
+                    <button onClick={() => handleDelete(svc.id)} disabled={deleting === svc.id} style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 12, cursor: 'pointer', padding: '4px 8px' }}>
+                      {deleting === svc.id ? '...' : 'ลบ'}
+                    </button>
+                  </div>
                 </div>
-              )
-            })}
-
-            {/* SYSTEM CATEGORIES GROUP */}
-            {[...new Map(systemServices.map(s => [s.subCategory?.category?.name, s.subCategory?.category?.name])).keys()].filter(Boolean).map(catName => (
-              <div key={catName} style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-light)', marginBottom: 8, paddingLeft: 4 }}>{catName}</div>
-                {systemServices.filter(s => s.subCategory?.category?.name === catName).map(svc => (
-                  <div key={svc.id} className="card-shadow" style={{ padding: 14, borderRadius: 12, marginBottom: 8 }}>
-                    {svc.images?.length > 0 && (
-                      <div style={{ display: 'flex', gap: 6, marginBottom: 10, overflowX: 'auto', paddingBottom: 4 }}>
-                        {svc.images.map((img, i) => (
-                          <div key={i} onClick={() => setViewingImages(svc.images!)} style={{ width: 64, height: 64, borderRadius: 8, overflow: 'hidden', flexShrink: 0, cursor: 'pointer' }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: 14 }}>{svc.subCategory?.name}</div>
-                        {svc.description && <div style={{ fontSize: 12, color: 'var(--text-light)', marginTop: 2 }}>{svc.description}</div>}
-                        {svc.basePrice != null && <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--primary)', marginTop: 4 }}>฿{svc.basePrice.toLocaleString()}</div>}
-                      </div>
-                      <button onClick={() => handleDelete(svc.id)} disabled={deleting === svc.id} style={{ background: 'none', border: 'none', color: 'var(--red)', fontSize: 12, cursor: 'pointer', padding: '4px 8px' }}>
-                        {deleting === svc.id ? '...' : 'ลบ'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </>
+              ))}
+            </div>
+          ))
         )}
 
         <button className="btn-primary" onClick={() => setShowAdd(true)} style={{ width: '100%', marginTop: 8 }}>
@@ -303,27 +234,28 @@ export default function MyServicesPage() {
         </button>
       </div>
 
+      {/* BACKDROP */}
+      {showAdd && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }}
+          onClick={() => { setShowAdd(false); setAddForm({ systemCatId: '', systemSubCategoryId: '', description: '', basePrice: '', images: [] }) }}
+        />
+      )}
+
       {/* ADD SERVICE BOTTOM SHEET */}
       {showAdd && (
         <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--card)',
-          borderRadius: '20px 20px 0 0', padding: 20, zIndex: 1000,
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.15)', maxHeight: '90vh', overflowY: 'auto'
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          background: 'white',
+          borderRadius: '20px 20px 0 0', padding: 20,
+          zIndex: 1000,
+          boxShadow: '0 -4px 30px rgba(0,0,0,0.2)',
+          maxHeight: '90vh', overflowY: 'auto',
         }}>
-          <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 16px' }} />
-          <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>เพิ่มบริการ</div>
+          {/* Handle */}
+          <div style={{ width: 40, height: 4, background: '#E0D5C0', borderRadius: 2, margin: '0 auto 16px' }} />
 
-          {/* MODE TOGGLE */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-            <button onClick={() => setAddForm(f => ({ ...f, mode: 'custom' }))}
-              style={{ flex: 1, padding: '10px', borderRadius: 10, border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', background: addForm.mode === 'custom' ? 'var(--primary)' : 'var(--bg)', color: addForm.mode === 'custom' ? '#3D2C00' : 'var(--text-light)' }}>
-              📂 หมวดหมู่ของฉัน
-            </button>
-            <button onClick={() => setAddForm(f => ({ ...f, mode: 'system' }))}
-              style={{ flex: 1, padding: '10px', borderRadius: 10, border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', background: addForm.mode === 'system' ? 'var(--primary)' : 'var(--bg)', color: addForm.mode === 'system' ? '#3D2C00' : 'var(--text-light)' }}>
-              🏢 จากระบบ
-            </button>
-          </div>
+          <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>เพิ่มบริการ</div>
 
           {/* IMAGE UPLOADS */}
           <div style={{ marginBottom: 14 }}>
@@ -353,67 +285,47 @@ export default function MyServicesPage() {
             </div>
           </div>
 
-          {/* CUSTOM CATEGORY PICKER */}
-          {addForm.mode === 'custom' && (
-            <>
-              {customCategories.length > 0 && (
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--text-light)' }}>เลือกจากหมวดหมู่ที่มีอยู่</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {customCategories.map(cat => (
-                      <button key={cat.id} onClick={() => setAddForm(f => ({ ...f, customCategoryId: cat.id, customCategoryName: cat.name }))}
-                        style={{
-                          padding: '6px 12px', borderRadius: 20, border: '1.5px solid',
-                          borderColor: addForm.customCategoryId === cat.id ? 'var(--primary)' : 'var(--border)',
-                          background: addForm.customCategoryId === cat.id ? 'var(--primary-light)' : 'var(--bg)',
-                          color: 'var(--text)', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-                        }}>
-                        {cat.icon} {cat.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--text-light)' }}>หรือสร้างหมวดหมู่ใหม่</div>
-                <input className="form-input" placeholder="ชื่อหมวดหมู่ใหม่ เช่น บริการล้างแอร์"
-                  value={addForm.customCategoryName}
-                  onChange={e => setAddForm(f => ({ ...f, customCategoryId: '', customCategoryName: e.target.value }))}
-                  style={{ width: '100%', marginBottom: 8 }} />
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {DEFAULT_ICONS.map(icon => (
-                    <button key={icon} onClick={() => setAddForm(f => ({ ...f, customCategoryIcon: icon }))}
-                      style={{ width: 36, height: 36, borderRadius: 8, border: addForm.customCategoryIcon === icon ? '2px solid var(--primary)' : '1.5px solid var(--border)', background: addForm.customCategoryIcon === icon ? 'var(--primary-light)' : 'var(--bg)', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {icon}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* SYSTEM CATEGORY PICKER */}
-          {addForm.mode === 'system' && (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--text-light)' }}>เลือกประเภทบริการ</div>
+          {/* Step 1: Select Category dropdown */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--text-light)' }}>เลือกหมวดหมู่/อาชีพ</div>
+            <select
+              value={addForm.systemCatId}
+              onChange={e => setAddForm(f => ({ ...f, systemCatId: e.target.value, systemSubCategoryId: '' }))}
+              style={{
+                width: '100%', padding: '10px 12px',
+                border: '1.5px solid var(--border)', borderRadius: 10,
+                fontSize: 13, fontFamily: 'Prompt, sans-serif',
+                background: 'white', color: 'var(--text)',
+                outline: 'none', cursor: 'pointer',
+              }}
+            >
+              <option value="">— เลือกหมวดหมู่ —</option>
               {systemCategories.map(cat => (
-                <div key={cat.id} style={{ marginBottom: 10 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-light)', marginBottom: 4 }}>{cat.icon} {cat.name}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {cat.subCategories.map(sub => (
-                      <button key={sub.id} onClick={() => setAddForm(f => ({ ...f, systemSubCategoryId: sub.id }))}
-                        style={{
-                          padding: '6px 12px', borderRadius: 20, border: '1.5px solid',
-                          borderColor: addForm.systemSubCategoryId === sub.id ? 'var(--primary)' : 'var(--border)',
-                          background: addForm.systemSubCategoryId === sub.id ? 'var(--primary-light)' : 'var(--bg)',
-                          color: 'var(--text)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                        }}>
-                        {sub.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
+            </select>
+          </div>
+
+          {/* Step 2: Select Sub-category dropdown */}
+          {selectedCat && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: 'var(--text-light)' }}>เลือกบริการ</div>
+              <select
+                value={addForm.systemSubCategoryId}
+                onChange={e => setAddForm(f => ({ ...f, systemSubCategoryId: e.target.value }))}
+                style={{
+                  width: '100%', padding: '10px 12px',
+                  border: '1.5px solid var(--border)', borderRadius: 10,
+                  fontSize: 13, fontFamily: 'Prompt, sans-serif',
+                  background: 'white', color: 'var(--text)',
+                  outline: 'none', cursor: 'pointer',
+                }}
+              >
+                <option value="">— เลือกบริการ —</option>
+                {selectedCat.subCategories.map(sub => (
+                  <option key={sub.id} value={sub.id}>{sub.name}</option>
+                ))}
+              </select>
             </div>
           )}
 
@@ -434,7 +346,10 @@ export default function MyServicesPage() {
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={() => { setShowAdd(false); setAddForm({ mode: 'custom', systemSubCategoryId: '', customCategoryId: '', customCategoryName: '', customCategoryIcon: '🔧', description: '', basePrice: '', images: [] }) }} className="btn-secondary" style={{ flex: 1 }}>ยกเลิก</button>
+            <button onClick={() => { setShowAdd(false); setAddForm({ systemCatId: '', systemSubCategoryId: '', description: '', basePrice: '', images: [] }) }}
+              style={{ flex: 1, padding: '12px', borderRadius: 10, border: '1.5px solid var(--border)', background: 'white', color: 'var(--text)', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Prompt, sans-serif' }}>
+              ยกเลิก
+            </button>
             <button onClick={handleAdd} disabled={adding} className="btn-primary" style={{ flex: 1 }}>
               {adding ? 'กำลัง...' : 'เพิ่ม'}
             </button>

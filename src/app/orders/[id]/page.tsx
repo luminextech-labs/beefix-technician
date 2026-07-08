@@ -23,11 +23,13 @@ export default function OrderDetailPage() {
   const [updating, setUpdating] = useState(false)
   const [showRevisionModal, setShowRevisionModal] = useState(false)
   const [showDisputeModal, setShowDisputeModal] = useState(false)
+  const [error, setError] = useState('')
 
   const load = () => {
     ordersApi.getOne(params.id as string).then(r => {
       if (r.success) setOrder(r.order)
-    }).finally(() => setLoading(false))
+      else setError(r.message || 'ไม่พบงาน')
+    }).catch((e: any) => setError(e.message || 'เกิดข้อผิดพลาด')).finally(() => setLoading(false))
   }
 
   useEffect(() => { load() }, [params.id])
@@ -49,6 +51,7 @@ export default function OrderDetailPage() {
   }
 
   if (loading) return <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'var(--bg)', fontSize:14 }}>กำลังโหลด...</div>
+  if (error) return <div style={{ padding: 20, textAlign: 'center' }}>❌ {error}</div>
   if (!order) return <div style={{ padding:20, textAlign:'center' }}>ไม่พบงาน</div>
 
   return (
@@ -86,13 +89,21 @@ export default function OrderDetailPage() {
         <div className="card-shadow" style={{ padding: 16, marginBottom: 12 }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>รายละเอียดราคา</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-            <span>ค่าแรง</span><span>฿{Number(order.laborCost).toLocaleString()}</span>
+            <span style={{ color: 'var(--text-light)' }}>ค่าแรง</span><span>฿{Number(order.laborCost).toLocaleString()}</span>
           </div>
+          {Number(order.travelCost) > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
+              <span style={{ color: 'var(--text-light)' }}>ค่าเดินทาง</span><span>฿{Number(order.travelCost).toLocaleString()}</span>
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-            <span>ค่าเดินทาง</span><span>฿{Number(order.travelCost || 0).toLocaleString()}</span>
+            <span style={{ color: 'var(--text-light)' }}>ค่าธรรมเนียม (5%)</span><span style={{ color: '#DC2626' }}>-฿{Number(order.platformFee / 2 || 0).toLocaleString()}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 700, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-            <span>รวม</span><span style={{ color: 'var(--green)' }}>฿{Number(order.totalAmount).toLocaleString()}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 700, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+            <span>ลูกค้าจ่าย</span><span style={{ color: 'var(--primary)' }}>฿{Number(order.totalAmount).toLocaleString()}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 700, paddingTop: 8, marginTop: 4, borderTop: '1.5px solid var(--border)', color: 'var(--green)' }}>
+            <span>💰 คุณได้รับ</span><span>฿{Number(order.technicianEarning).toLocaleString()}</span>
           </div>
         </div>
 
@@ -117,9 +128,16 @@ export default function OrderDetailPage() {
           </button>
         )}
         {order.status === 'in_progress' && (
-          <button className="btn-primary" style={{ marginBottom: 10, background: 'var(--green)', color: 'white', boxShadow: 'none' }} disabled={updating} onClick={() => updateStatus('completed')}>
-            {updating ? 'กำลัง...' : '✅ งานเสร็จสิ้น'}
+          <button className="btn-primary" style={{ marginBottom: 10, background: 'var(--green)', color: 'white', boxShadow: 'none' }} disabled={updating} onClick={() => updateStatus('customer_pending')}>
+            {updating ? 'กำลัง...' : '📤 ส่งมอบงาน'}
           </button>
+        )}
+        {order.status === 'customer_pending' && (
+          <div className="card-shadow" style={{ padding: 16, textAlign: 'center', background: '#FEF3C7' }}>
+            <div style={{ fontSize: 32, marginBottom: 4 }}>⏳</div>
+            <div style={{ fontWeight: 700, color: '#D97706' }}>รอลูกค้ารับงาน</div>
+            <div style={{ fontSize: 12, color: '#92400E', marginTop: 4 }}>ลูกค้ากำลังตรวจสอบงานของคุณ</div>
+          </div>
         )}
         {order.status === 'completed' && (
           <div className="card-shadow" style={{ padding: 16, textAlign: 'center', background: '#D1FAE5' }}>

@@ -34,6 +34,15 @@ export default function CertificationsPage() {
   const handleCertFileChange = async (e: React.ChangeEvent<HTMLInputElement>, certIndex: number) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    // Block non-image files
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif']
+    if (!allowed.includes(file.type)) {
+      setError('❌ อนุญาตเฉพาะไฟล์รูปภาพเท่านั้น (JPG, PNG, GIF, WebP, HEIC)')
+      if (certFileRef.current) certFileRef.current.value = ''
+      return
+    }
+
     setUploadingCertIndex(certIndex)
     try {
       const res = await uploadApi.image(file, 'certifications')
@@ -109,12 +118,13 @@ export default function CertificationsPage() {
 
         <div style={{ fontSize: 13, color: 'var(--text-light)', marginBottom: 16 }}>
           📜 เพิ่มใบรับรองหรือประกาศนียบัตรของคุณ — ช่วยสร้างความน่าเชื่อถือให้ลูกค้า
+          <br/><span style={{ color: '#DC2626' }}>⚠️ อัปโหลดได้เฉพาะไฟล์รูปภาพ (JPG, PNG, GIF, WebP, HEIC) เท่านั้น</span>
         </div>
 
         <input
           ref={certFileRef}
           type="file"
-          accept="image/*,.pdf"
+          accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif"
           style={{ display: 'none' }}
           onChange={e => {
             if (uploadingCertIndex !== null) handleCertFileChange(e, uploadingCertIndex)
@@ -183,7 +193,7 @@ export default function CertificationsPage() {
                   gap: 6,
                 }}>
                 {uploadingCertIndex === i ? '⏳ กำลังอัปโหลด...' :
-                  cert.fileUrl ? '📎 อัปโหลดแล้ว — กดเปลี่ยนไฟล์' : '📎 แนบไฟล์ (รูป / PDF)'}
+                  cert.fileUrl ? '📎 อัปโหลดแล้ว — กดเปลี่ยนไฟล์' : '📎 แนบรูปภาพ (JPG, PNG, GIF, WebP)'}
               </button>
               {cert.fileUrl && (
                 <a href={cert.fileUrl} target="_blank" rel="noreferrer"
@@ -219,7 +229,7 @@ export default function CertificationsPage() {
 
       <div className="bottom-nav">
         <Link href="/dashboard" className="nav-item"><span className="nav-icon">🏠</span>หน้าแรก</Link>
-        <Link href="/orders" className="nav-item"><span style={{ fontSize: 20 }}>📋</span>งาน</Link>
+        <Link href="/orders" className="nav-item"><span className="nav-icon">📋</span>งาน</Link>
         <Link href="/chat" className="nav-item"><span className="nav-icon">💬</span>แชท</Link>
         <Link href="/wallet" className="nav-item"><span className="nav-icon">💳</span>กระเป๋า</Link>
         <Link href="/profile" className="nav-item active"><span className="nav-icon">👤</span>โปรไฟล์</Link>
